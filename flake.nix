@@ -21,7 +21,7 @@
       ];
   in {
     devShell.x86_64-linux = pkgs.mkShell {
-      nativeBuildInputs = with pkgs; [
+      buildInputs = with pkgs; [
         python3
         black
         isort
