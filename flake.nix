@@ -14,10 +14,14 @@
     };
     python-packages = ps:
       with ps; [
-        # HTTP library
-        requests
-        # network packet manipulation library
-        scapy
+        requests # HTTP library
+        paramiko # native Python SSHv2 protocol library
+        dnspython # DNS toolkit for Python
+        scapy # network packet manipulation library
+        python-nmap # nmap port scanner
+        validators # data validation for humans™
+        types-ipaddress # typing stubs for ipaddress
+        #argh # argparse wrapper
       ];
   in {
     devShell.x86_64-linux = pkgs.mkShell {
