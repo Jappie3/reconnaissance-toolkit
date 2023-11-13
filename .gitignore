@@ -1,1 +1,5 @@
 .direnv/
+.vscode/
+__pycache__/
+# contains list of targets
+targets.txt
