@@ -102,6 +102,12 @@ def init():
         "--log-level", "-l", default="WARNING", type=str, required=False
     )
 
+    # optionally silence all output
+    parser.add_argument("--silent", "-s", required=False, action='store_true')
+
+    # optionally specify output file
+    parser.add_argument("--output-file", "-o", type=str, required=False)
+
     # DEBUG ->    detailed information, only interesting when troubleshooting
     # INFO ->     confirm things are working as expected
     # WARNING ->  indication that something unexpected happened or some problem in the near future - software still works as expected
@@ -128,13 +134,21 @@ def init():
     LOG = logging.getLogger("logger")
     LOG.setLevel(args.log_level)
 
-    console_handler = logging.StreamHandler()
-    console_handler.setLevel(args.log_level)
-    console_handler.setFormatter(
-        logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
-    )
+    formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
 
-    LOG.addHandler(console_handler)
+    # console handler - write log to stdout
+    if not args.silent:
+        console_handler = logging.StreamHandler()
+        console_handler.setLevel(args.log_level)
+        console_handler.setFormatter(formatter)
+        LOG.addHandler(console_handler)
+
+    # file handler - write log to file
+    if args.output_file:
+        file_handler = logging.FileHandler(args.output_file)
+        file_handler.setLevel(args.log_level)
+        file_handler.setFormatter(formatter)
+        LOG.addHandler(file_handler)
 
     LOG.info(f"Log level set to {args.log_level}")
 
