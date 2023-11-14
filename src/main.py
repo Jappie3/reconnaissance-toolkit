@@ -6,6 +6,8 @@ import logging, socket, nmap, argparse, ipaddress, validators
 
 verbose = False
 
+global TARGETS
+TARGETS=[]
 
 def search_local_network(network):
     """
@@ -65,14 +67,19 @@ def host_detect_os(target_ip):
 
 
 def validate_targets(targets):
+    """
+    Validate an array of targets
+    Returns an array of JSON objects containing the target & the target type
+    """
     LOG.info(f"Validating {len(targets)} targets...")
     for target in targets:
         if validators.domain(target):
             LOG.debug(f"Valid domain: {target}")
-            pass
+            TARGETS.append({"target":target,"type":"domain"})
         else:
             try:
                 ipaddress.ip_address(target)
+                TARGETS.append({"target":target,"type":"ip"})
                 LOG.debug(f"Valid IP: {target}")
             except ValueError:
                 LOG.error(
@@ -103,8 +110,8 @@ def init():
 
     args = parser.parse_args()
 
-    global TARGETS
-    TARGETS = (
+    global TARGETS_RAW
+    TARGETS_RAW = (
         [args.target]
         if args.target is not None
         else open("targets.txt", "r").read().splitlines()
@@ -134,7 +141,7 @@ def init():
 
 def main():
     init()
-    validate_targets(TARGETS)
+    validate_targets(TARGETS_RAW)
 
 
 if __name__ == "__main__":
