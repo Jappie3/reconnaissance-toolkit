@@ -114,6 +114,8 @@ def init():
     # ERROR ->    serious problem, software was unable to perform some functions
     # CRITICAL -> serious error, program may be unable to continue running
 
+    parser.add_argument("--dns-resolver", default="9.9.9.9", type=str, required=False, help="The DNS resolver to use for lookups")
+
     args = parser.parse_args()
 
     global TARGETS_TXT
@@ -130,6 +132,9 @@ def init():
     global LOG
     LOG = logging.getLogger("logger")
     LOG.setLevel(args.log_level)
+
+    global DNS_RESOLVER
+    DNS_RESOLVER = args.dns_resolver
 
     formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
 
