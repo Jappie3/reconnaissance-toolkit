@@ -3,3 +3,5 @@
 __pycache__/
 # contains list of targets
 targets.txt
+# output file
+out.txt
