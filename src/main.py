@@ -94,27 +94,17 @@ def init():
     """
     parser = argparse.ArgumentParser()
 
-    # optionally specify a single target - will later default to sourcing targets.txt for a list of targets
-    parser.add_argument("--target", "-t", type=str, required=False)
-
-    # optionally specify log level - default is WARNING
-    parser.add_argument(
-        "--log-level", "-l", default="WARNING", type=str, required=False, choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
-    )
-
-    # optionally silence all output
-    parser.add_argument("--silent", "-s", required=False, action='store_true')
-
-    # optionally specify output file
-    parser.add_argument("--output-file", "-o", type=str, required=False)
+    parser.add_argument("--target", "-t", type=str, required=False, help="Specify a single target to scan. If you want to scan a list of targets, use targets.txt.")
+    parser.add_argument("--log-level", "-l", default="WARNING", type=str, required=False, choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"], help="Specifies the log level (verbosity) of the program")
+    parser.add_argument("--silent", "-s", required=False, action='store_true', help="If provided, the program will not output to STDOUT.")
+    parser.add_argument("--dns-resolver", default="9.9.9.9", type=str, required=False, help="The DNS resolver to use for lookups")
+    parser.add_argument("--output-file", "-o", type=str, required=False, help="If provided, the logs will be written to the file specified.")
 
     # DEBUG ->    detailed information, only interesting when troubleshooting
     # INFO ->     confirm things are working as expected
     # WARNING ->  indication that something unexpected happened or some problem in the near future - software still works as expected
     # ERROR ->    serious problem, software was unable to perform some functions
     # CRITICAL -> serious error, program may be unable to continue running
-
-    parser.add_argument("--dns-resolver", default="9.9.9.9", type=str, required=False, help="The DNS resolver to use for lookups")
 
     args = parser.parse_args()
 
