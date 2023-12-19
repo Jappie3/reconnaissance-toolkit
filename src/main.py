@@ -116,8 +116,8 @@ def init():
 
     args = parser.parse_args()
 
-    global TARGETS_RAW
-    TARGETS_RAW = (
+    global TARGETS_TXT
+    TARGETS_TXT = (
         [args.target]
         if args.target is not None
         else open("targets.txt", "r").read().splitlines()
