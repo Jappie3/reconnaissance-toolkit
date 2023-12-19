@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import logging, socket, nmap, argparse, ipaddress, validators, json
 import dns.resolver, dns.reversename
