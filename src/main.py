@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
+import logging, socket, nmap, argparse, ipaddress, validators, json
+import dns.resolver, dns.reversename
 from scapy.all import *
-import logging, socket, nmap, argparse, ipaddress, validators
 
 
 verbose = False
@@ -64,6 +65,36 @@ def host_detect_os(target_ip):
             return "OS information not available"
     else:
         return "IP unreachable or invalid"
+
+
+def dns_lookup(t: str) -> Dict[str, str]:
+    """
+    Retrieve information about a target via DNS
+    The resolver to be used is stored in the global variable DNS_RESOLVER
+    """
+    target = t['target']
+    type = t['type']
+    resolver = dns.resolver.make_resolver_at(DNS_RESOLVER)
+    results = {"DNS":[]}
+    if type == "domain":
+        # domain -> look up some records & append them to results['DNS']
+        LOG.debug(f"DNS - scanning domain: {target}")
+        # TODO DNSSEC
+        for record in ["NS", "A", "AAAA", "TXT", "MX"]:
+            try:
+                recs = resolver.resolve(target, record)
+                results['DNS'].append({record: [str(r) for r in recs]})
+            except Exception as e:
+                LOG.debug(f"DNS - {target}: {e}")
+    elif type == "ip":
+        # IP -> look up reverse DNS for the host & append to results['DNS']
+        LOG.debug(f"DNS - scanning IP: {target}")
+        addr=dns.reversename.from_address(target)
+        results['DNS'].append({"RDNS": {"IP": str(addr), "FQDN": str(resolver.resolve(addr, "PTR")[0])}})
+    else:
+        # this should never happen but still
+        LOG.error(f"DNS - not an IP or domain, can't scan: {target}")
+    return results
 
 
 def validate_targets(targets):
