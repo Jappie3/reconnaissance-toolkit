@@ -99,7 +99,7 @@ def init():
 
     # optionally specify log level - default is WARNING
     parser.add_argument(
-        "--log-level", "-l", default="WARNING", type=str, required=False
+        "--log-level", "-l", default="WARNING", type=str, required=False, choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
     )
 
     # optionally silence all output
@@ -123,9 +123,6 @@ def init():
         else open("targets.txt", "r").read().splitlines()
     )
 
-    if args.log_level not in ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]:
-        print("Log level should be one of DEBUG, INFO, WARNING, ERROR or CRITICAL.")
-        exit(1)
     if args.log_level in ["DEBUG", "INFO"]:
         # set scapy verbosity level
         verbose = True
