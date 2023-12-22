@@ -176,6 +176,16 @@ def init():
         required=False,
         help="If provided, the logs will be written to the file specified.",
     )
+    parser.add_argument(
+        "--scans",
+        "-S",
+        metavar="",
+        type=str,
+        required=True,
+        nargs="+",
+        choices=SCANS_MAP.keys(),
+        help="Define which scans to run on the target(s).",
+    )
 
     # DEBUG ->    detailed information, only interesting when troubleshooting
     # INFO ->     confirm things are working as expected
@@ -191,6 +201,9 @@ def init():
         if args.target is not None
         else open("targets.txt", "r").read().splitlines()
     )
+
+    global SCANS
+    SCANS = args.scans
 
     if args.log_level in ["DEBUG", "INFO"]:
         # set scapy verbosity level
