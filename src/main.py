@@ -8,7 +8,8 @@ from scapy.all import *
 verbose = False
 
 global TARGETS
-TARGETS=[]
+TARGETS = []
+
 
 def search_local_network(network):
     """
@@ -72,10 +73,10 @@ def dns_lookup(t: str) -> Dict[str, str]:
     Retrieve information about a target via DNS
     The resolver to be used is stored in the global variable DNS_RESOLVER
     """
-    target = t['target']
-    type = t['type']
+    target = t["target"]
+    type = t["type"]
     resolver = dns.resolver.make_resolver_at(DNS_RESOLVER)
-    results = {"DNS":[]}
+    results = {"DNS": []}
     if type == "domain":
         # domain -> look up some records & append them to results['DNS']
         LOG.debug(f"DNS - scanning domain: {target}")
@@ -83,14 +84,16 @@ def dns_lookup(t: str) -> Dict[str, str]:
         for record in ["NS", "A", "AAAA", "TXT", "MX"]:
             try:
                 recs = resolver.resolve(target, record)
-                results['DNS'].append({record: [str(r) for r in recs]})
+                results["DNS"].append({record: [str(r) for r in recs]})
             except Exception as e:
                 LOG.debug(f"DNS - {target}: {e}")
     elif type == "ip":
         # IP -> look up reverse DNS for the host & append to results['DNS']
         LOG.debug(f"DNS - scanning IP: {target}")
-        addr=dns.reversename.from_address(target)
-        results['DNS'].append({"RDNS": {"IP": str(addr), "FQDN": str(resolver.resolve(addr, "PTR")[0])}})
+        addr = dns.reversename.from_address(target)
+        results["DNS"].append(
+            {"RDNS": {"IP": str(addr), "FQDN": str(resolver.resolve(addr, "PTR")[0])}}
+        )
     else:
         # this should never happen but still
         LOG.error(f"DNS - not an IP or domain, can't scan: {target}")
@@ -106,11 +109,11 @@ def validate_targets(targets):
     for target in targets:
         if validators.domain(target):
             LOG.debug(f"Valid domain: {target}")
-            TARGETS.append({"target":target,"type":"domain"})
+            TARGETS.append({"target": target, "type": "domain"})
         else:
             try:
                 ipaddress.ip_address(target)
-                TARGETS.append({"target":target,"type":"ip"})
+                TARGETS.append({"target": target, "type": "ip"})
                 LOG.debug(f"Valid IP: {target}")
             except ValueError:
                 LOG.error(
@@ -125,11 +128,43 @@ def init():
     """
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--target", "-t", type=str, required=False, help="Specify a single target to scan. If you want to scan a list of targets, use targets.txt.")
-    parser.add_argument("--log-level", "-l", default="WARNING", type=str, required=False, choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"], help="Specifies the log level (verbosity) of the program")
-    parser.add_argument("--silent", "-s", required=False, action='store_true', help="If provided, the program will not output to STDOUT.")
-    parser.add_argument("--dns-resolver", default="9.9.9.9", type=str, required=False, help="The DNS resolver to use for lookups")
-    parser.add_argument("--output-file", "-o", type=str, required=False, help="If provided, the logs will be written to the file specified.")
+    parser.add_argument(
+        "--target",
+        "-t",
+        type=str,
+        required=False,
+        help="Specify a single target to scan. If you want to scan a list of targets, use targets.txt.",
+    )
+    parser.add_argument(
+        "--log-level",
+        "-l",
+        default="WARNING",
+        type=str,
+        required=False,
+        choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+        help="Specifies the log level (verbosity) of the program",
+    )
+    parser.add_argument(
+        "--silent",
+        "-s",
+        required=False,
+        action="store_true",
+        help="If provided, the program will not output to STDOUT.",
+    )
+    parser.add_argument(
+        "--dns-resolver",
+        default="9.9.9.9",
+        type=str,
+        required=False,
+        help="The DNS resolver to use for lookups",
+    )
+    parser.add_argument(
+        "--output-file",
+        "-o",
+        type=str,
+        required=False,
+        help="If provided, the logs will be written to the file specified.",
+    )
 
     # DEBUG ->    detailed information, only interesting when troubleshooting
     # INFO ->     confirm things are working as expected
