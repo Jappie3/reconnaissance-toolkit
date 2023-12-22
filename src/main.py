@@ -243,7 +243,17 @@ def init():
 
 def main():
     init()
-    validate_targets(TARGETS_RAW)
+    validate_targets(TARGETS_TXT)
+
+    # for every scan the user specified with --scans
+    for scan in SCANS:
+        # TODO use threading (maybe a pool) to start a bunch of scans at the same time
+        # also make an option to stay single-threaded to prevent detection?
+        # run the scan for every target
+        for i in range(0, len(TARGETS)):
+            TARGETS[i]["results"].append(SCANS_MAP[scan](TARGETS[i]))
+
+    print(json.dumps(TARGETS, indent=2))
 
 
 if __name__ == "__main__":
