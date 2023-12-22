@@ -107,6 +107,12 @@ def dns_lookup(t: str) -> Dict[str, str]:
     return results
 
 
+# dictionary to map strings used in arguments (--scans) to function definitions
+SCANS_MAP = {
+    "dns-lookup": dns_lookup,
+}
+
+
 def validate_targets(targets):
     """
     Validate an array of targets
