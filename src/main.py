@@ -1,9 +1,16 @@
 #!/usr/bin/env python3
 
-import logging, socket, nmap, argparse, ipaddress, validators, json
-import dns.resolver, dns.reversename
-from scapy.all import *
+import argparse
+import ipaddress
+import json
+import logging
+import socket
 
+import dns.resolver
+import dns.reversename
+import nmap
+import validators
+from scapy.all import *
 
 verbose = False
 
