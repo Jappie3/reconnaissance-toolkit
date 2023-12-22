@@ -122,11 +122,11 @@ def validate_targets(targets):
     for target in targets:
         if validators.domain(target):
             LOG.debug(f"Valid domain: {target}")
-            TARGETS.append({"target": target, "type": "domain"})
+            TARGETS.append({"target": target, "type": "domain", "results": []})
         else:
             try:
                 ipaddress.ip_address(target)
-                TARGETS.append({"target": target, "type": "ip"})
+                TARGETS.append({"target": target, "type": "ip", "results": []})
                 LOG.debug(f"Valid IP: {target}")
             except ValueError:
                 LOG.error(
