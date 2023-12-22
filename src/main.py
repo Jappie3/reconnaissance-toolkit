@@ -138,13 +138,15 @@ def init():
     parser.add_argument(
         "--target",
         "-t",
+        metavar="",
         type=str,
         required=False,
-        help="Specify a single target to scan. If you want to scan a list of targets, use targets.txt.",
+        help="Specify a single target to scan - IP or domain. If you want to scan a list of targets, use targets.txt.",
     )
     parser.add_argument(
         "--log-level",
         "-l",
+        metavar="",
         default="WARNING",
         type=str,
         required=False,
@@ -160,6 +162,7 @@ def init():
     )
     parser.add_argument(
         "--dns-resolver",
+        metavar="",
         default="9.9.9.9",
         type=str,
         required=False,
@@ -168,6 +171,7 @@ def init():
     parser.add_argument(
         "--output-file",
         "-o",
+        metavar="",
         type=str,
         required=False,
         help="If provided, the logs will be written to the file specified.",
