@@ -95,7 +95,7 @@ def dns_lookup(t: str) -> Dict[str, str]:
             dns.rdatatype.MX,
         ]:
             try:
-                recs = resolver.resolve(target, record)
+                recs = resolver.resolve(dns.name.from_text(target), record)
                 results["DNS"].append(
                     {dns.rdatatype.to_text(record): [str(r) for r in recs]}
                 )
