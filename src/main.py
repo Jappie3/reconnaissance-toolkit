@@ -6,6 +6,7 @@ import json
 import logging
 import socket
 
+import dns.dnssec
 import dns.resolver
 import dns.reversename
 import nmap
@@ -86,7 +87,7 @@ def dns_lookup(t: str) -> Dict[str, str]:
     results = {"DNS": []}
     if type == "domain":
         # domain -> look up some records & append them to results['DNS']
-        LOG.debug(f"DNS - scanning domain: {target}")
+        LOG.debug(f"DNS - Scanning domain: {target}")
         for record in [
             dns.rdatatype.NS,
             dns.rdatatype.A,
@@ -95,18 +96,80 @@ def dns_lookup(t: str) -> Dict[str, str]:
             dns.rdatatype.MX,
         ]:
             try:
-                recs = resolver.resolve(dns.name.from_text(target), record)
+                recs = dns.resolver.resolve(dns.name.from_text(target), record)
                 results["DNS"].append(
                     {dns.rdatatype.to_text(record): [str(r) for r in recs]}
                 )
             except Exception as e:
-                LOG.debug(f"DNS - {target}: {e}")
+                LOG.error(f"DNS - {target}: {e}")
+
+        # look up NS, get NS IP, validate DNSSEC
+        LOG.debug(f"DNS - checking & validating DNSSEC for: {target}")
+
+        # get IP of NS
+        try:
+            nameserver_a = (
+                dns.resolver.resolve(
+                    # get NS record for target
+                    dns.resolver.resolve(dns.name.from_text(target), dns.rdatatype.NS)
+                    .rrset[0]
+                    .to_text(),
+                    # request A record for the domain of the nameserver
+                    dns.rdatatype.A,
+                )
+                .rrset[0]
+                .to_text()
+            )
+        except (
+            dns.resolver.NXDOMAIN,
+            dns.resolver.NoAnswer,
+            dns.resolver.NoNameservers,
+        ) as e:
+            LOG.debug(f"DNS - Error while checking NS records for {target}: {e}")
+
+        # validate DNSSEC
+        try:
+            ns_response = dns.query.udp(
+                # get DNSKEY for the zone
+                dns.message.make_query(
+                    dns.name.from_text(target), dns.rdatatype.DNSKEY, want_dnssec=True
+                ),
+                # send query to nameserver's IP
+                nameserver_a,
+            )
+            # answer should contain DNSKEY and RRSIG(DNSKEY)
+            if len(ns_response.answer) != 2:
+                raise Exception("NS response did not contain DNSKEY and/or RRSIG")
+            # validate DNSKEY & RRSIG
+            dns.dnssec.validate(
+                ns_response.answer[0],
+                ns_response.answer[1],
+                {dns.name.from_text(target): ns_response.answer[0]},
+            )
+            # check parent zone for a DS record (mandatory for DNSSEC)
+            parent_zone = ".".join(target.split(".")[-2:])
+            parent_ds = dns.resolver.resolve(parent_zone, dns.rdatatype.DS)
+            if parent_ds:
+                # if we get to this point wo/ errors -> DNSSEC is valid
+                results["DNS"].append({"DNSSEC": True})
+            else:
+                raise Exception(f"no DS record found in parent zone of {target}")
+
+        except Exception as e:
+            results["DNS"].append({"DNSSEC": False})
+            LOG.error(f"DNS - Error while validating DNSSEC for {target}: {e}")
+
     elif type == "ip":
         # IP -> look up reverse DNS for the host & append to results['DNS']
         LOG.debug(f"DNS - scanning IP: {target}")
         addr = dns.reversename.from_address(target)
         results["DNS"].append(
-            {"RDNS": {"IP": str(addr), "FQDN": str(resolver.resolve(addr, "PTR")[0])}}
+            {
+                "RDNS": {
+                    "IP": str(addr),
+                    "FQDN": str(dns.resolver.resolve(addr, "PTR")[0]),
+                }
+            }
         )
     else:
         # this should never happen but still
