@@ -109,7 +109,7 @@ def dns_lookup(t: str) -> Dict[str, str]:
 
         # get IP of NS
         try:
-            nameserver_a = (
+            nameserver_ip = (
                 dns.resolver.resolve(
                     # get NS record for target
                     dns.resolver.resolve(dns.name.from_text(target), dns.rdatatype.NS)
@@ -136,7 +136,7 @@ def dns_lookup(t: str) -> Dict[str, str]:
                     dns.name.from_text(target), dns.rdatatype.DNSKEY, want_dnssec=True
                 ),
                 # send query to nameserver's IP
-                nameserver_a,
+                nameserver_ip,
             )
             # answer should contain DNSKEY and RRSIG(DNSKEY)
             if len(ns_response.answer) != 2:
