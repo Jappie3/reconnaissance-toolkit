@@ -11,6 +11,7 @@ import dns.resolver
 import dns.reversename
 import nmap
 import validators
+from pygments import formatters, highlight, lexers
 from scapy.all import *
 
 verbose = False
@@ -323,7 +324,13 @@ def main():
         for i in range(0, len(TARGETS)):
             TARGETS[i]["results"].append(SCANS_MAP[scan](TARGETS[i]))
 
-    print(json.dumps(TARGETS, indent=2))
+    print(
+        highlight(
+            json.dumps(TARGETS, indent=2),
+            lexers.JsonLexer(),
+            formatters.TerminalFormatter(),
+        )
+    )
 
 
 if __name__ == "__main__":

@@ -22,6 +22,7 @@
         validators # data validation for humans™
         types-ipaddress # typing stubs for ipaddress
         #argh # argparse wrapper
+        pygments # syntax highlighter for e.g. json output
       ];
   in
     flake-parts.lib.mkFlake {inherit inputs;} {
