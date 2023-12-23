@@ -87,11 +87,18 @@ def dns_lookup(t: str) -> Dict[str, str]:
     if type == "domain":
         # domain -> look up some records & append them to results['DNS']
         LOG.debug(f"DNS - scanning domain: {target}")
-        # TODO DNSSEC
-        for record in ["NS", "A", "AAAA", "TXT", "MX"]:
+        for record in [
+            dns.rdatatype.NS,
+            dns.rdatatype.A,
+            dns.rdatatype.AAAA,
+            dns.rdatatype.TXT,
+            dns.rdatatype.MX,
+        ]:
             try:
                 recs = resolver.resolve(target, record)
-                results["DNS"].append({record: [str(r) for r in recs]})
+                results["DNS"].append(
+                    {dns.rdatatype.to_text(record): [str(r) for r in recs]}
+                )
             except Exception as e:
                 LOG.debug(f"DNS - {target}: {e}")
     elif type == "ip":
