@@ -20,24 +20,6 @@ global TARGETS
 TARGETS = []
 
 
-def host_portscan(target_ip, port_range=(1, 1023)):
-    """
-    Scan a host for open ports by using TCP SYN packets
-    Parameters: target ip & a port range (defaults to 0-1024)
-    Returns an array of ports, e.g. [22, 53, 80, 443]
-    """
-    ports = []
-    for port in range(port_range[0], port_range[1] + 1):
-        # create & send TCP SYN packet
-        response = sr1(
-            IP(dst=target_ip) / TCP(sport=6666, dport=port, flags="S"),
-            timeout=1,
-            verbose=verbose,
-        )
-        # check if response is a TCP packet with the SYN-ACK flag set
-        if response and response.haslayer(TCP) and response.getlayer(TCP).flags == 0x12:
-            ports.append(port)
-    return ports
 
 
 def detect_os(t: str) -> Dict[str, str]:
