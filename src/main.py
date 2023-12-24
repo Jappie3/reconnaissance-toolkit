@@ -207,6 +207,14 @@ def init() -> NoReturn:
         help="Specifies the log level (verbosity) of the program",
     )
     parser.add_argument(
+        "--log-file",
+        "-L",
+        metavar="out.log",
+        type=str,
+        required=False,
+        help="If provided, the logs will be written to the file specified. Note: this does not imply --silent.",
+    )
+    parser.add_argument(
         "--silent",
         "-s",
         required=False,
@@ -284,8 +292,8 @@ def init() -> NoReturn:
         logging.disable(logging.CRITICAL)
 
     # file handler - write log to file
-    if args.output_file:
-        file_handler = logging.FileHandler(args.output_file)
+    if args.log_file:
+        file_handler = logging.FileHandler(args.log_file)
         file_handler.setLevel(args.log_level)
         file_handler.setFormatter(formatter)
         LOG.addHandler(file_handler)
