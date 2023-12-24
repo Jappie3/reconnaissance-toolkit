@@ -270,6 +270,9 @@ def init() -> NoReturn:
 
     formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
 
+    global SILENT
+    SILENT = args.silent
+
     if not args.silent:
         # console handler - write log to stdout
         console_handler = logging.StreamHandler()
@@ -302,13 +305,14 @@ def main() -> NoReturn:
         for i in range(0, len(TARGETS)):
             TARGETS[i]["results"].append(SCANS_MAP[scan](TARGETS[i]))
 
-    print(
-        highlight(
-            json.dumps(TARGETS, indent=2),
-            lexers.JsonLexer(),
-            formatters.TerminalFormatter(),
+    if not SILENT:
+        print(
+            highlight(
+                json.dumps(TARGETS, indent=2),
+                lexers.JsonLexer(),
+                formatters.TerminalFormatter(),
+            )
         )
-    )
 
 
 if __name__ == "__main__":
