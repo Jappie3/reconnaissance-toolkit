@@ -254,12 +254,11 @@ def init():
     parser.add_argument(
         "--scans",
         "-S",
-        metavar="",
         type=str,
         required=True,
         nargs="+",
         choices=SCANS_MAP.keys(),
-        help="Define which scans to run on the target(s).",
+        help="Define which scan(s) to run on the target(s).",
     )
 
     # DEBUG ->    detailed information, only interesting when troubleshooting
