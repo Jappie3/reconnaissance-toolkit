@@ -105,18 +105,17 @@ def dns_lookup(t: str) -> Dict[str, List]:
             except Exception as e:
                 LOG.error(f"DNS - {target}: {e}")
 
-        # look up NS, get NS IP, validate DNSSEC
+        # look up NS & get NS IP
         LOG.debug(f"DNS - checking & validating DNSSEC for: {target}")
 
         # get IP of NS
         try:
+            # get NS record for target
+            nameserver_ns = dns.resolver.resolve(qname, dns.rdatatype.NS)
+            # get A record for the domain of the nameserver
             nameserver_ip = (
                 dns.resolver.resolve(
-                    # get NS record for target
-                    dns.resolver.resolve(dns.name.from_text(target), dns.rdatatype.NS)
-                    .rrset[0]
-                    .to_text(),
-                    # request A record for the domain of the nameserver
+                    nameserver_ns.rrset[0].to_text(),
                     dns.rdatatype.A,
                 )
                 .rrset[0]
