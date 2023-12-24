@@ -98,7 +98,7 @@ def dns_lookup(t: str) -> Dict[str, List]:
             dns.rdatatype.MX,
         ]:
             try:
-                recs = dns.resolver.resolve(qname, record)
+                recs = resolver.resolve(qname, record)
                 results["DNS"].append(
                     {dns.rdatatype.to_text(record): [str(r) for r in recs]}
                 )
@@ -111,10 +111,10 @@ def dns_lookup(t: str) -> Dict[str, List]:
         # get IP of NS
         try:
             # get NS record for target
-            nameserver_ns = dns.resolver.resolve(qname, dns.rdatatype.NS)
+            nameserver_ns = resolver.resolve(qname, dns.rdatatype.NS)
             # get A record for the domain of the nameserver
             nameserver_ip = (
-                dns.resolver.resolve(
+                resolver.resolve(
                     nameserver_ns.rrset[0].to_text(),
                     dns.rdatatype.A,
                 )
@@ -147,7 +147,7 @@ def dns_lookup(t: str) -> Dict[str, List]:
             )
             # check parent zone for a DS record (mandatory for DNSSEC)
             parent_zone = ".".join(target.split(".")[-2:])
-            parent_ds = dns.resolver.resolve(parent_zone, dns.rdatatype.DS)
+            parent_ds = resolver.resolve(parent_zone, dns.rdatatype.DS)
             if parent_ds:
                 # if we get to this point wo/ errors -> DNSSEC is valid
                 results["DNS"].append({"DNSSEC": True})
@@ -166,7 +166,7 @@ def dns_lookup(t: str) -> Dict[str, List]:
             {
                 "RDNS": {
                     "IP": str(addr),
-                    "FQDN": str(dns.resolver.resolve(addr, "PTR")[0]),
+                    "FQDN": str(resolver.resolve(addr, "PTR")[0]),
                 }
             }
         )
