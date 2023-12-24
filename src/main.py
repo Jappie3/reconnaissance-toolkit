@@ -270,12 +270,15 @@ def init() -> NoReturn:
 
     formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
 
-    # console handler - write log to stdout
     if not args.silent:
+        # console handler - write log to stdout
         console_handler = logging.StreamHandler()
         console_handler.setLevel(args.log_level)
         console_handler.setFormatter(formatter)
         LOG.addHandler(console_handler)
+    else:
+        # disable all logging
+        logging.disable(logging.CRITICAL)
 
     # file handler - write log to file
     if args.output_file:
