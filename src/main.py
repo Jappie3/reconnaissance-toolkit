@@ -184,7 +184,7 @@ def validate_targets(targets: List) -> NoReturn:
 
 def init() -> NoReturn:
     """
-    Parse arguments & set loglevel
+    Parse arguments & set necessary variables
     """
     parser = argparse.ArgumentParser()
 
