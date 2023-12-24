@@ -4,7 +4,7 @@ import argparse
 import ipaddress
 import json
 import logging
-import socket
+from typing import List, TypedDict
 
 import dns.dnssec
 import dns.resolver
@@ -20,9 +20,13 @@ global TARGETS
 TARGETS = []
 
 
+class TargetDict(TypedDict):
+    target: str
+    type: str
+    results: List
 
 
-def detect_os(t: str) -> Dict[str, str]:
+def detect_os(t: TargetDict) -> Dict[str, List | str]:
     """
     Try to detect the OS of the target using the Nmap library.
     """
@@ -51,7 +55,7 @@ def detect_os(t: str) -> Dict[str, str]:
             return {"OS-detection": "IP unreachable or invalid"}
 
 
-def dns_lookup(t: str) -> Dict[str, List]:
+def dns_lookup(t: TargetDict) -> Dict[str, List]:
     """
     Retrieve information about a target via DNS
     The resolver to be used is stored in the global variable DNS_RESOLVER
@@ -157,10 +161,9 @@ SCANS_MAP = {
 }
 
 
-def validate_targets(targets):
+def validate_targets(targets: List) -> NoReturn:
     """
     Validate an array of targets
-    Returns an array of JSON objects containing the target & the target type
     """
     LOG.info(f"Validating {len(targets)} targets...")
     for target in targets:
@@ -179,7 +182,7 @@ def validate_targets(targets):
                 exit(1)
 
 
-def init():
+def init() -> NoReturn:
     """
     Parse arguments & set loglevel
     """
@@ -284,7 +287,7 @@ def init():
     LOG.info(f"Log level set to {args.log_level}")
 
 
-def main():
+def main() -> NoReturn:
     init()
     validate_targets(TARGETS_TXT)
 
