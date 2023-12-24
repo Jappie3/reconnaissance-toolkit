@@ -60,21 +60,33 @@ def host_portscan(target_ip, port_range=(1, 1023)):
     return ports
 
 
-def host_detect_os(target_ip):
+def detect_os(t: str) -> Dict[str, str]:
     """
-    Detect the OS of the target IP using the Nmap library.
-    Parameter: target_ip
+    Try to detect the OS of the target using the Nmap library.
     """
+    target = t["target"]
     nm = nmap.PortScanner()
-    nm.scan(target_ip, arguments="-O")
-    if target_ip in nm.all_hosts():
-        os_info = nm[target_ip]["osmatch"]
-        if os_info:
-            return os_info[0]["name"]
-        else:
-            return "OS information not available"
+    LOG.info("Running OS scan with root privileges...")
+    try:
+        nm.scan(target, arguments="-O", sudo=True)
+    except Exception as e:
+        LOG.error(
+            f"OS-detection - Something went wrong while trying to scan {target}: {e}"
+        )
     else:
-        return "IP unreachable or invalid"
+        if target in nm.all_hosts():
+            os_info = nm[target]["osmatch"]
+            if os_info:
+                return {
+                    "OS-detection": [
+                        {"name": os_info[0]["name"]},
+                        {"accuracy": os_info[0]["accuracy"]},
+                    ]
+                }
+            else:
+                return {"OS-detection": "OS information not available"}
+        else:
+            return {"OS-detection": "IP unreachable or invalid"}
 
 
 def dns_lookup(t: str) -> Dict[str, List]:
@@ -179,6 +191,7 @@ def dns_lookup(t: str) -> Dict[str, List]:
 # dictionary to map strings used in arguments (--scans) to function definitions
 SCANS_MAP = {
     "dns-lookup": dns_lookup,
+    "detect-os": detect_os,
 }
 
 
