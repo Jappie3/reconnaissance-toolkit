@@ -197,6 +197,23 @@ def init() -> NoReturn:
         help="Specify a single target to scan - IP or domain. If you want to scan a list of targets, use targets.txt.",
     )
     parser.add_argument(
+        "--scans",
+        "-S",
+        type=str,
+        required=True,
+        nargs="+",
+        choices=SCANS_MAP.keys(),
+        help="Define which scan(s) to run on the target(s).",
+    )
+    parser.add_argument(
+        "--output-file",
+        "-o",
+        metavar="out.json",
+        type=str,
+        required=False,
+        help="File to which the output should be written.",
+    )
+    parser.add_argument(
         "--log-level",
         "-l",
         metavar="",
@@ -228,23 +245,6 @@ def init() -> NoReturn:
         type=str,
         required=False,
         help="The DNS resolver to use for lookups",
-    )
-    parser.add_argument(
-        "--output-file",
-        "-o",
-        metavar="out.json",
-        type=str,
-        required=False,
-        help="File to which the output should be written.",
-    )
-    parser.add_argument(
-        "--scans",
-        "-S",
-        type=str,
-        required=True,
-        nargs="+",
-        choices=SCANS_MAP.keys(),
-        help="Define which scan(s) to run on the target(s).",
     )
 
     # DEBUG ->    detailed information, only interesting when troubleshooting
