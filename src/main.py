@@ -85,6 +85,7 @@ def dns_lookup(t: str) -> Dict[str, List]:
     target = t["target"]
     type = t["type"]
     resolver = dns.resolver.make_resolver_at(DNS_RESOLVER)
+    qname = dns.name.from_text(target)
     results = {"DNS": []}
     if type == "domain":
         # domain -> look up some records & append them to results['DNS']
@@ -97,7 +98,7 @@ def dns_lookup(t: str) -> Dict[str, List]:
             dns.rdatatype.MX,
         ]:
             try:
-                recs = dns.resolver.resolve(dns.name.from_text(target), record)
+                recs = dns.resolver.resolve(qname, record)
                 results["DNS"].append(
                     {dns.rdatatype.to_text(record): [str(r) for r in recs]}
                 )
@@ -132,9 +133,7 @@ def dns_lookup(t: str) -> Dict[str, List]:
         try:
             ns_response = dns.query.udp(
                 # get DNSKEY for the zone
-                dns.message.make_query(
-                    dns.name.from_text(target), dns.rdatatype.DNSKEY, want_dnssec=True
-                ),
+                dns.message.make_query(qname, dns.rdatatype.DNSKEY, want_dnssec=True),
                 # send query to nameserver's IP
                 nameserver_ip,
             )
@@ -145,7 +144,7 @@ def dns_lookup(t: str) -> Dict[str, List]:
             dns.dnssec.validate(
                 ns_response.answer[0],
                 ns_response.answer[1],
-                {dns.name.from_text(target): ns_response.answer[0]},
+                {qname: ns_response.answer[0]},
             )
             # check parent zone for a DS record (mandatory for DNSSEC)
             parent_zone = ".".join(target.split(".")[-2:])
