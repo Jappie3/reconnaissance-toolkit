@@ -232,10 +232,10 @@ def init() -> NoReturn:
     parser.add_argument(
         "--output-file",
         "-o",
-        metavar="",
+        metavar="out.json",
         type=str,
         required=False,
-        help="If provided, the logs will be written to the file specified.",
+        help="File to which the output should be written.",
     )
     parser.add_argument(
         "--scans",
