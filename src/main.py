@@ -20,26 +20,6 @@ global TARGETS
 TARGETS = []
 
 
-def search_local_network(network):
-    """
-    Search a network for hosts by using ARP requests.
-    Parameter: network to search
-    Returns an array of dicts that contain both the IP and MAC address of the found hosts
-    e.g. [{'ip': '127.0.0.2', 'mac': 'ff:ff:ff:ff:ff:ff'}, {...}, ...]
-    """
-    # create & send ARP packet
-    arp_res = srp(
-        Ether(dst="ff:ff:ff:ff:ff:ff") / ARP(pdst=network),
-        timeout=1,
-        verbose=verbose,
-    )[0]
-    results = []
-    # get IPs & MAC addresses from result
-    for element in arp_res:
-        results.append({"ip": element[1].psrc, "mac": element[1].hwsrc})
-    return results
-
-
 def host_portscan(target_ip, port_range=(1, 1023)):
     """
     Scan a host for open ports by using TCP SYN packets
