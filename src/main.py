@@ -77,7 +77,7 @@ def host_detect_os(target_ip):
         return "IP unreachable or invalid"
 
 
-def dns_lookup(t: str) -> Dict[str, str]:
+def dns_lookup(t: str) -> Dict[str, List]:
     """
     Retrieve information about a target via DNS
     The resolver to be used is stored in the global variable DNS_RESOLVER
