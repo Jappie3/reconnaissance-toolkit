@@ -265,6 +265,15 @@ def init() -> NoReturn:
     global SCANS
     SCANS = args.scans
 
+    global OUTPUT_FILE
+    OUTPUT_FILE = args.output_file
+
+    global DNS_RESOLVER
+    DNS_RESOLVER = args.dns_resolver
+
+    global SILENT
+    SILENT = args.silent
+
     if args.log_level in ["DEBUG", "INFO"]:
         # set scapy verbosity level
         verbose = True
@@ -273,13 +282,7 @@ def init() -> NoReturn:
     LOG = logging.getLogger("logger")
     LOG.setLevel(args.log_level)
 
-    global DNS_RESOLVER
-    DNS_RESOLVER = args.dns_resolver
-
     formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
-
-    global SILENT
-    SILENT = args.silent
 
     if not args.silent:
         # console handler - write log to stdout
