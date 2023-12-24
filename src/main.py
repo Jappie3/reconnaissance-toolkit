@@ -127,7 +127,7 @@ def dns_lookup(t: str) -> Dict[str, List]:
             dns.resolver.NoAnswer,
             dns.resolver.NoNameservers,
         ) as e:
-            LOG.debug(f"DNS - Error while checking NS records for {target}: {e}")
+            LOG.error(f"DNS - Error while checking NS records for {target}: {e}")
 
         # validate DNSSEC
         try:
