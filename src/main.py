@@ -219,7 +219,7 @@ def init() -> NoReturn:
         "-s",
         required=False,
         action="store_true",
-        help="If provided, the program will not output to STDOUT.",
+        help="Do not output anything to STDOUT.",
     )
     parser.add_argument(
         "--dns-resolver",
