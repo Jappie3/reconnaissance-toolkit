@@ -4,7 +4,7 @@ import argparse
 import ipaddress
 import json
 import logging
-from typing import List, TypedDict
+from typing import List, Dict, Any, TypedDict, Union, NoReturn
 
 import dns.dnssec
 import dns.resolver
@@ -12,7 +12,6 @@ import dns.reversename
 import nmap
 import validators
 from pygments import formatters, highlight, lexers
-from scapy.all import *
 
 verbose = False
 
@@ -26,7 +25,7 @@ class TargetDict(TypedDict):
     results: List
 
 
-def detect_os(t: TargetDict) -> Dict[str, List | str]:
+def detect_os(t: TargetDict) -> Dict[str, Dict[str, Any]] | Dict[str, str]:
     """
     Try to detect the OS of the target using the Nmap library.
     """
@@ -44,10 +43,10 @@ def detect_os(t: TargetDict) -> Dict[str, List | str]:
             os_info = nm[target]["osmatch"]
             if os_info:
                 return {
-                    "OS-detection": [
-                        {"name": os_info[0]["name"]},
-                        {"accuracy": os_info[0]["accuracy"]},
-                    ]
+                    "OS-detection": {
+                        "name": os_info[0]["name"],
+                        "accuracy": os_info[0]["accuracy"],
+                    }
                 }
             else:
                 return {"OS-detection": "OS information not available"}
@@ -55,7 +54,7 @@ def detect_os(t: TargetDict) -> Dict[str, List | str]:
             return {"OS-detection": "IP unreachable or invalid"}
 
 
-def dns_lookup(t: TargetDict) -> Dict[str, List]:
+def dns_lookup(t: TargetDict) -> Dict[str, Dict[str, Union[list[str], str]]]:
     """
     Retrieve information about a target via DNS
     The resolver to be used is stored in the global variable DNS_RESOLVER
@@ -64,7 +63,7 @@ def dns_lookup(t: TargetDict) -> Dict[str, List]:
     type = t["type"]
     resolver = dns.resolver.make_resolver_at(DNS_RESOLVER)
     qname = dns.name.from_text(target)
-    results = {"DNS": []}
+    results = {"DNS": {}}
     if type == "domain":
         # domain -> look up some records & append them to results['DNS']
         LOG.debug(f"DNS - Scanning domain: {target}")
@@ -77,9 +76,7 @@ def dns_lookup(t: TargetDict) -> Dict[str, List]:
         ]:
             try:
                 recs = resolver.resolve(qname, record)
-                results["DNS"].append(
-                    {dns.rdatatype.to_text(record): [str(r) for r in recs]}
-                )
+                results["DNS"][dns.rdatatype.to_text(record)] = [str(r) for r in recs]
             except Exception as e:
                 LOG.error(f"DNS - {target}: {e}")
 
@@ -128,26 +125,22 @@ def dns_lookup(t: TargetDict) -> Dict[str, List]:
             parent_ds = resolver.resolve(parent_zone, dns.rdatatype.DS)
             if parent_ds:
                 # if we get to this point wo/ errors -> DNSSEC is valid
-                results["DNS"].append({"DNSSEC": True})
+                results["DNS"]["DNSSEC"] = True
             else:
                 raise Exception(f"no DS record found in parent zone of {target}")
 
         except Exception as e:
-            results["DNS"].append({"DNSSEC": False})
+            results["DNS"]["DNSSEC"] = False
             LOG.error(f"DNS - Error while validating DNSSEC for {target}: {e}")
 
     elif type == "ip":
         # IP -> look up reverse DNS for the host & append to results['DNS']
         LOG.debug(f"DNS - scanning IP: {target}")
         addr = dns.reversename.from_address(target)
-        results["DNS"].append(
-            {
-                "RDNS": {
-                    "IP": str(addr),
-                    "FQDN": str(resolver.resolve(addr, "PTR")[0]),
-                }
-            }
-        )
+        results["DNS"]["RDNS"] = {
+            "IP": str(addr),
+            "FQDN": str(resolver.resolve(addr, "PTR")[0]),
+        }
     else:
         # this should never happen but still
         LOG.error(f"DNS - not an IP or domain, can't scan: {target}")

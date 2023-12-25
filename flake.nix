@@ -17,7 +17,7 @@
         requests # HTTP library
         paramiko # native Python SSHv2 protocol library
         dnspython # DNS toolkit for Python
-        scapy # network packet manipulation library
+        #scapy # network packet manipulation library
         python-nmap # nmap port scanner
         validators # data validation for humans™
         types-ipaddress # typing stubs for ipaddress
