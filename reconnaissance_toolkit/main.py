@@ -4,7 +4,10 @@ import argparse
 import ipaddress
 import json
 import logging
-from typing import List, Dict, Any, TypedDict, Union, NoReturn
+import os
+import subprocess
+import sys
+from typing import Any, Dict, List, NoReturn, TypedDict, Union
 
 import dns.dnssec
 import dns.resolver
@@ -23,6 +26,30 @@ class TargetDict(TypedDict):
     target: str
     type: str
     results: List
+
+
+def ssh_audit(t: TargetDict) -> Dict[str, Dict[str, Any]]:
+    target = t["target"]
+    LOG.info(f"ssh-audit - Starting scan for {target}")
+    try:
+        shell = os.environ.get("SHELL")
+    except Exception as e:
+        LOG.error(f"ssh-audit - Could not retrieve shell from SHELL env var: {e}")
+    else:
+        try:
+            result = subprocess.run(
+                f"ssh-audit {target} --json",
+                shell=True,
+                executable=shell,
+                check=True,
+                text=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+            )
+            LOG.info(f"ssh-audit - Finished scan for {target}")
+            return {"ssh-audit": json.loads(result.stdout)}
+        except Exception as e:
+            LOG.error(f"ssh-audit - Something went wrong while running ssh-audit: {e}")
 
 
 def port_scan(
@@ -185,6 +212,7 @@ SCANS_MAP = {
     "dns-lookup": dns_lookup,
     "detect-os": detect_os,
     "port-scan": port_scan,
+    "ssh-audit": ssh_audit,
 }
 
 
