@@ -32,6 +32,7 @@
       perSystem = {
         pkgs,
         system,
+        self',
         ...
       }: {
         devShells.default = pkgs.mkShell {
@@ -42,6 +43,22 @@
             pkgs.python3Packages.setuptools
             (pkgs.python3.withPackages python-packages)
           ];
+        };
+        packages = {
+          default = self'.packages.reconnaissance-toolkit;
+          reconnaissance-toolkit = pkgs.python3Packages.buildPythonPackage {
+            pname = "reconnaissance-toolkit";
+            version = "0.0.1";
+            src = ./.;
+            propagatedBuildInputs = [
+              (pkgs.python3.withPackages python-packages)
+            ];
+            checkPhase = ''
+              runHook preCheck
+              ${pkgs.python3.interpreter} -m unittest
+              runHook postCheck
+            '';
+          };
         };
       };
     };
