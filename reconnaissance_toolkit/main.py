@@ -222,7 +222,7 @@ SCANS_MAP = {
 }
 
 
-def validate_targets(targets: List) -> NoReturn:
+def validate_targets(targets: List) -> None:
     """
     Validate an array of targets
     """
@@ -243,7 +243,7 @@ def validate_targets(targets: List) -> NoReturn:
                 exit(1)
 
 
-def init() -> NoReturn:
+def init() -> None:
     """
     Parse arguments & set necessary variables
     """
