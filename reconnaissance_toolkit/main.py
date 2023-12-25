@@ -27,7 +27,7 @@ class TargetDict(TypedDict):
 
 def port_scan(
     t: TargetDict,
-) -> Dict[str, Dict[str, Union[str, List[int]]]]:
+) -> Dict[str, Dict[str, Any]]:
     """
     Perform a port scan on a target using the Nmap library.
     """
@@ -41,15 +41,17 @@ def port_scan(
     else:
         if target in nm.all_hosts():
             host = nm[target]
+            # print(json.dumps(host, indent=2))
             return {
                 "port-scan": {
-                    "host": host["addr"],
-                    "state": host["status"]["state"],
+                    "vendor": host["vendor"],
+                    "status": host["status"],
                     "open_ports": [
                         port
                         for port in host["tcp"].keys()
                         if host["tcp"][port]["state"] == "open"
                     ],
+                    "tcp_ports": host["tcp"],
                 }
             }
         else:
