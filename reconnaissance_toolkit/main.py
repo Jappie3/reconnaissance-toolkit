@@ -58,16 +58,19 @@ def port_scan(
     Perform a port scan on a target using the Nmap library.
     """
     target = t["target"]
+    LOG.info(f"port-scan - Starting scan for {target}")
     nm = nmap.PortScanner()
 
     try:
         nm.scan(target, arguments="-p-", sudo=True)
     except Exception as e:
-        print(f"Something went wrong while trying to scan {target}: {e}")
+        LOG.error(
+            f"port-scan - Something went wrong while trying to scan {target}: {e}"
+        )
     else:
         if target in nm.all_hosts():
             host = nm[target]
-            # print(json.dumps(host, indent=2))
+            LOG.info(f"port-scan - Finished scan for {target}")
             return {
                 "port-scan": {
                     "vendor": host["vendor"],
@@ -90,7 +93,9 @@ def detect_os(t: TargetDict) -> Dict[str, Dict[str, Any]]:
     """
     target = t["target"]
     nm = nmap.PortScanner()
-    LOG.info("Running OS scan with root privileges...")
+    LOG.info(
+        f"OS-detection - Running OS scan against {target}, will request root privileges if necessary..."
+    )
     try:
         nm.scan(target, arguments="-O", sudo=True)
     except Exception as e:
@@ -101,6 +106,7 @@ def detect_os(t: TargetDict) -> Dict[str, Dict[str, Any]]:
         if target in nm.all_hosts():
             os_info = nm[target]["osmatch"]
             if os_info:
+                LOG.info(f"OS-detection - Finished scanning {target}")
                 return {
                     "OS-detection": {
                         "name": os_info[0]["name"],
@@ -125,7 +131,7 @@ def dns_lookup(t: TargetDict) -> Dict[str, Dict[str, Union[list[str], str]]]:
     results = {"DNS": {}}
     if type == "domain":
         # domain -> look up some records & append them to results['DNS']
-        LOG.debug(f"DNS - Scanning domain: {target}")
+        LOG.info(f"DNS - Scanning domain: {target}")
         for record in [
             dns.rdatatype.NS,
             dns.rdatatype.A,
@@ -140,7 +146,7 @@ def dns_lookup(t: TargetDict) -> Dict[str, Dict[str, Union[list[str], str]]]:
                 LOG.error(f"DNS - {target}: {e}")
 
         # look up NS & get NS IP
-        LOG.debug(f"DNS - checking & validating DNSSEC for: {target}")
+        LOG.info(f"DNS - Checking & validating DNSSEC for: {target}")
 
         # get IP of NS
         try:
@@ -194,7 +200,7 @@ def dns_lookup(t: TargetDict) -> Dict[str, Dict[str, Union[list[str], str]]]:
 
     elif type == "ip":
         # IP -> look up reverse DNS for the host & append to results['DNS']
-        LOG.debug(f"DNS - scanning IP: {target}")
+        LOG.info(f"DNS - Scanning IP: {target}")
         addr = dns.reversename.from_address(target)
         results["DNS"]["RDNS"] = {
             "IP": str(addr),
@@ -203,6 +209,7 @@ def dns_lookup(t: TargetDict) -> Dict[str, Dict[str, Union[list[str], str]]]:
     else:
         # this should never happen but still
         LOG.error(f"DNS - not an IP or domain, can't scan: {target}")
+    LOG.info(f"DNS - Finished scanning {target}")
     return results
 
 
