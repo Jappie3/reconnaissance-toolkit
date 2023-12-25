@@ -352,12 +352,23 @@ def init() -> None:
 
     # file handler - write log to file
     if args.log_file:
+        if os.path.exists(args.log_file):
+            LOG.critical(
+                f"Error: file {args.log_file} exists. Either remove it or specify a different log file."
+            )
+            exit(1)
         file_handler = logging.FileHandler(args.log_file)
         file_handler.setLevel(args.log_level)
         file_handler.setFormatter(formatter)
         LOG.addHandler(file_handler)
 
     LOG.info(f"Log level set to {args.log_level}")
+
+    if os.path.exists(args.output_file):
+        LOG.critical(
+            f"Error: file {args.output_file} exists. Either remove it or specify a different output file."
+        )
+        exit(1)
 
 
 def main() -> NoReturn:
