@@ -15,8 +15,6 @@ import nmap
 import validators
 from pygments import formatters, highlight, lexers
 
-verbose = False
-
 global TARGETS
 TARGETS = []
 
@@ -332,10 +330,6 @@ def init() -> None:
 
     global SILENT
     SILENT = args.silent
-
-    if args.log_level in ["DEBUG", "INFO"]:
-        # set scapy verbosity level
-        verbose = True
 
     global LOG
     LOG = logging.getLogger("logger")
