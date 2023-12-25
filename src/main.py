@@ -214,21 +214,18 @@ def init() -> NoReturn:
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
-        "--target",
-        "-t",
-        metavar="",
+        "scans",
         type=str,
-        required=False,
-        help="Specify a single target to scan - IP or domain. If you want to scan a list of targets, use targets.txt.",
-    )
-    parser.add_argument(
-        "--scans",
-        "-S",
-        type=str,
-        required=True,
         nargs="+",
         choices=SCANS_MAP.keys(),
         help="Define which scan(s) to run on the target(s).",
+    )
+    parser.add_argument(
+        "--target",
+        "-t",
+        type=str,
+        required=False,
+        help="Specify a single target to scan - IP or domain. If you want to scan a list of targets, use targets.txt.",
     )
     parser.add_argument(
         "--output-file",
