@@ -349,9 +349,6 @@ def init() -> None:
         console_handler.setLevel(args.log_level)
         console_handler.setFormatter(formatter)
         LOG.addHandler(console_handler)
-    else:
-        # disable all logging
-        logging.disable(logging.CRITICAL)
 
     # file handler - write log to file
     if args.log_file:
