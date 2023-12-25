@@ -39,6 +39,7 @@
             python3
             black
             isort
+            pkgs.python3Packages.setuptools
             (pkgs.python3.withPackages python-packages)
           ];
         };
