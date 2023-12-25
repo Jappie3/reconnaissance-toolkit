@@ -29,7 +29,7 @@ class TargetDict(TypedDict):
 
 def ssh_audit(t: TargetDict) -> Dict[str, Dict[str, Any]]:
     target = t["target"]
-    LOG.info(f"ssh-audit - Starting scan for {target}")
+    LOG.debug(f"ssh-audit - Starting scan for {target}")
     try:
         shell = os.environ.get("SHELL")
     except Exception as e:
@@ -45,7 +45,7 @@ def ssh_audit(t: TargetDict) -> Dict[str, Dict[str, Any]]:
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
             )
-            LOG.info(f"ssh-audit - Finished scan for {target}")
+            LOG.debug(f"ssh-audit - Finished scan for {target}")
             return {"ssh-audit": json.loads(result.stdout)}
         except Exception as e:
             LOG.error(f"ssh-audit - Something went wrong while running ssh-audit: {e}")
@@ -58,7 +58,7 @@ def port_scan(
     Perform a port scan on a target using the Nmap library.
     """
     target = t["target"]
-    LOG.info(f"port-scan - Starting scan for {target}")
+    LOG.debug(f"port-scan - Starting scan for {target}")
     nm = nmap.PortScanner()
 
     try:
@@ -70,7 +70,7 @@ def port_scan(
     else:
         if target in nm.all_hosts():
             host = nm[target]
-            LOG.info(f"port-scan - Finished scan for {target}")
+            LOG.debug(f"port-scan - Finished scan for {target}")
             return {
                 "port-scan": {
                     "vendor": host["vendor"],
@@ -93,7 +93,7 @@ def detect_os(t: TargetDict) -> Dict[str, Dict[str, Any]]:
     """
     target = t["target"]
     nm = nmap.PortScanner()
-    LOG.info(
+    LOG.debug(
         f"OS-detection - Running OS scan against {target}, will request root privileges if necessary..."
     )
     try:
@@ -106,7 +106,7 @@ def detect_os(t: TargetDict) -> Dict[str, Dict[str, Any]]:
         if target in nm.all_hosts():
             os_info = nm[target]["osmatch"]
             if os_info:
-                LOG.info(f"OS-detection - Finished scanning {target}")
+                LOG.debug(f"OS-detection - Finished scanning {target}")
                 return {
                     "OS-detection": {
                         "name": os_info[0]["name"],
@@ -131,7 +131,7 @@ def dns_lookup(t: TargetDict) -> Dict[str, Dict[str, Union[list[str], str]]]:
     results = {"DNS": {}}
     if type == "domain":
         # domain -> look up some records & append them to results['DNS']
-        LOG.info(f"DNS - Scanning domain: {target}")
+        LOG.debug(f"DNS - Scanning domain: {target}")
         for record in [
             dns.rdatatype.NS,
             dns.rdatatype.A,
@@ -146,7 +146,7 @@ def dns_lookup(t: TargetDict) -> Dict[str, Dict[str, Union[list[str], str]]]:
                 LOG.error(f"DNS - {target}: {e}")
 
         # look up NS & get NS IP
-        LOG.info(f"DNS - Checking & validating DNSSEC for: {target}")
+        LOG.debug(f"DNS - Checking & validating DNSSEC for: {target}")
 
         # get IP of NS
         try:
@@ -200,7 +200,7 @@ def dns_lookup(t: TargetDict) -> Dict[str, Dict[str, Union[list[str], str]]]:
 
     elif type == "ip":
         # IP -> look up reverse DNS for the host & append to results['DNS']
-        LOG.info(f"DNS - Scanning IP: {target}")
+        LOG.debug(f"DNS - Scanning IP: {target}")
         addr = dns.reversename.from_address(target)
         results["DNS"]["RDNS"] = {
             "IP": str(addr),
@@ -209,7 +209,7 @@ def dns_lookup(t: TargetDict) -> Dict[str, Dict[str, Union[list[str], str]]]:
     else:
         # this should never happen but still
         LOG.error(f"DNS - not an IP or domain, can't scan: {target}")
-    LOG.info(f"DNS - Finished scanning {target}")
+    LOG.debug(f"DNS - Finished scanning {target}")
     return results
 
 
@@ -377,13 +377,17 @@ def main() -> None:
 
     # for every scan the user specified
     for scan in SCANS:
+        LOG.info(f"Main - processing scan: {scan}...")
         # TODO use threading (maybe a pool) to start a bunch of scans at the same time
         # also make an option to stay single-threaded to prevent detection?
         # run the scan for every target
         for i in range(0, len(TARGETS)):
             TARGETS[i]["results"].append(SCANS_MAP[scan](TARGETS[i]))
 
+    LOG.info(f"Main - All scans processed, handling output...")
+
     if not SILENT:
+        LOG.info(f"Main - printing to STDOUT")
         print(
             highlight(
                 json.dumps(TARGETS, indent=2),
@@ -393,10 +397,14 @@ def main() -> None:
         )
 
     if OUTPUT_FILE:
+        LOG.info(f"Main - Writing output to file...")
         with open(OUTPUT_FILE, "w") as f:
             f.write(
                 json.dumps(TARGETS),
             )
+
+    LOG.info(f"Main - Program done, exiting...")
+    exit(0)
 
 
 if __name__ == "__main__":
