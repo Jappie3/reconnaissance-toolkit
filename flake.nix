@@ -24,6 +24,18 @@
         #argh # argparse wrapper
         pygments # syntax highlighter for e.g. json output
       ];
+    pypi-packages = ps:
+      with ps; [
+        (buildPythonPackage rec {
+          pname = "ssh-audit";
+          version = "3.1.0";
+          doCheck = false;
+          src = fetchPypi {
+            inherit pname version;
+            sha256 = "sha256-wcDp5zUhQOTTauprRHIQ6eD8ADFLgj0/+WNS1Vi+9nc=";
+          };
+        })
+      ];
   in
     flake-parts.lib.mkFlake {inherit inputs;} {
       systems = [
@@ -42,6 +54,7 @@
             isort
             pkgs.python3Packages.setuptools
             (pkgs.python3.withPackages python-packages)
+            (pkgs.python3.withPackages pypi-packages)
           ];
         };
         packages = {
