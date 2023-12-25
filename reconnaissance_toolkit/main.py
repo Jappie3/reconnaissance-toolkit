@@ -392,6 +392,12 @@ def main() -> NoReturn:
             )
         )
 
+    if OUTPUT_FILE:
+        with open(OUTPUT_FILE, "w") as f:
+            f.write(
+                json.dumps(TARGETS),
+            )
+
 
 if __name__ == "__main__":
     main()
