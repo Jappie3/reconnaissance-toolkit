@@ -371,11 +371,11 @@ def init() -> None:
         exit(1)
 
 
-def main() -> NoReturn:
+def main() -> None:
     init()
     validate_targets(TARGETS_TXT)
 
-    # for every scan the user specified with --scans
+    # for every scan the user specified
     for scan in SCANS:
         # TODO use threading (maybe a pool) to start a bunch of scans at the same time
         # also make an option to stay single-threaded to prevent detection?
