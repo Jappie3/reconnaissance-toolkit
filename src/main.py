@@ -25,6 +25,37 @@ class TargetDict(TypedDict):
     results: List
 
 
+def port_scan(
+    t: TargetDict,
+) -> Dict[str, Dict[str, Union[str, List[int]]]]:
+    """
+    Perform a port scan on a target using the Nmap library.
+    """
+    target = t["target"]
+    nm = nmap.PortScanner()
+
+    try:
+        nm.scan(target, arguments="-p-", sudo=True)
+    except Exception as e:
+        print(f"Something went wrong while trying to scan {target}: {e}")
+    else:
+        if target in nm.all_hosts():
+            host = nm[target]
+            return {
+                "portscan": {
+                    "host": host["addr"],
+                    "state": host["status"]["state"],
+                    "open_ports": [
+                        port
+                        for port in host["tcp"].keys()
+                        if host["tcp"][port]["state"] == "open"
+                    ],
+                }
+            }
+        else:
+            return {"Host": "IP unreachable or invalid"}
+
+
 def detect_os(t: TargetDict) -> Dict[str, Dict[str, Any]] | Dict[str, str]:
     """
     Try to detect the OS of the target using the Nmap library.
@@ -151,6 +182,7 @@ def dns_lookup(t: TargetDict) -> Dict[str, Dict[str, Union[list[str], str]]]:
 SCANS_MAP = {
     "dns-lookup": dns_lookup,
     "detect-os": detect_os,
+    "port-scan": port_scan,
 }
 
 
