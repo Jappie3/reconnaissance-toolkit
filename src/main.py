@@ -42,7 +42,7 @@ def port_scan(
         if target in nm.all_hosts():
             host = nm[target]
             return {
-                "portscan": {
+                "port-scan": {
                     "host": host["addr"],
                     "state": host["status"]["state"],
                     "open_ports": [
@@ -53,7 +53,7 @@ def port_scan(
                 }
             }
         else:
-            return {"Host": "IP unreachable or invalid"}
+            return {"port-scan": "IP unreachable or invalid"}
 
 
 def detect_os(t: TargetDict) -> Dict[str, Dict[str, Any]] | Dict[str, str]:
