@@ -56,7 +56,7 @@ def port_scan(
             return {"port-scan": "IP unreachable or invalid"}
 
 
-def detect_os(t: TargetDict) -> Dict[str, Dict[str, Any]] | Dict[str, str]:
+def detect_os(t: TargetDict) -> Dict[str, Dict[str, Any]]:
     """
     Try to detect the OS of the target using the Nmap library.
     """
