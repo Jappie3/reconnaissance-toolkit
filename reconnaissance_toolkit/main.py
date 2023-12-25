@@ -254,55 +254,56 @@ def init() -> None:
         type=str,
         nargs="+",
         choices=SCANS_MAP.keys(),
-        help="Define which scan(s) to run on the target(s).",
+        help="define which scan(s) to run on the target(s)",
     )
     parser.add_argument(
-        "--target",
         "-t",
+        "--target",
+        metavar="127.0.0.1",
         type=str,
         required=False,
-        help="Specify a single target to scan - IP or domain. If you want to scan a list of targets, use targets.txt.",
+        help="specify a single target to scan - IP or domain. If you want to scan a list of targets, use targets.txt",
     )
     parser.add_argument(
-        "--output-file",
         "-o",
+        "--output-file",
         metavar="out.json",
         type=str,
         required=False,
-        help="File to which the output should be written.",
+        help="file to which the output should be written",
     )
     parser.add_argument(
-        "--log-level",
         "-l",
-        metavar="",
+        "--log-level",
+        metavar="DEBUG",
         default="WARNING",
         type=str,
         required=False,
         choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
-        help="Specifies the log level (verbosity) of the program",
+        help="specifies the log level (verbosity) of the program",
     )
     parser.add_argument(
-        "--log-file",
         "-L",
+        "--log-file",
         metavar="out.log",
         type=str,
         required=False,
-        help="If provided, the logs will be written to the file specified. Note: this does not imply --silent.",
-    )
-    parser.add_argument(
-        "--silent",
-        "-s",
-        required=False,
-        action="store_true",
-        help="Do not output anything to STDOUT.",
+        help="if provided, the logs will be written to the file specified. Note: this does not imply --silent",
     )
     parser.add_argument(
         "--dns-resolver",
-        metavar="",
+        metavar="9.9.9.9",
         default="9.9.9.9",
         type=str,
         required=False,
-        help="The DNS resolver to use for lookups",
+        help="the DNS resolver to use for lookups (default: 9.9.9.9)",
+    )
+    parser.add_argument(
+        "-s",
+        "--silent",
+        required=False,
+        action="store_true",
+        help="do not output anything to STDOUT",
     )
 
     # DEBUG ->    detailed information, only interesting when troubleshooting
