@@ -4,5 +4,6 @@ result
 __pycache__/
 # contains list of targets
 targets.txt
-# output file
-out.txt
+# output files
+out.log
+out.json
