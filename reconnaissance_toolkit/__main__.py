@@ -6,7 +6,7 @@ import json
 import logging
 import os
 import subprocess
-from typing import Any, Dict, List, TypedDict, Union
+from typing import Any, Dict, List, NoReturn, Tuple, TypedDict, Union, Optional
 
 import dns.dnssec
 import dns.resolver
@@ -36,7 +36,9 @@ SCANS_MAP = {
 }
 
 
-def validate_targets(targets: List, l: logging.Logger) -> None:
+def validate_targets(
+    targets: List, l: logging.Logger
+) -> List[Dict[str, Union[str, List]]]:
     """
     Validate an array of targets
     """
@@ -58,7 +60,7 @@ def validate_targets(targets: List, l: logging.Logger) -> None:
     return targets_res
 
 
-def init() -> logging.Logger:
+def init() -> Tuple[List, List, logging.Logger, bool, Optional[str]]:
     """
     Parse arguments & set necessary variables
     """
@@ -174,11 +176,11 @@ def init() -> logging.Logger:
         )
         exit(1)
 
-    return targets, scans, log, output_file, silent
+    return targets, scans, log, silent, output_file
 
 
-def main() -> None:
-    targets_txt, scans, log, output_file, silent = init()
+def main() -> NoReturn:
+    targets_txt, scans, log, silent, output_file = init()
     targets = validate_targets(targets_txt, log)
 
     # for every scan the user specified
