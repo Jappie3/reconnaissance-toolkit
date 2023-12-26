@@ -6,7 +6,7 @@ import json
 import logging
 import os
 import subprocess
-from typing import Any, Dict, List, NoReturn, TypedDict, Union
+from typing import Any, Dict, List, TypedDict, Union
 
 import dns.dnssec
 import dns.resolver
