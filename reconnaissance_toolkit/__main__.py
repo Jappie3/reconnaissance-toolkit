@@ -5,13 +5,8 @@ import ipaddress
 import json
 import logging
 import os
-import subprocess
-from typing import Any, Dict, List, NoReturn, Tuple, TypedDict, Union, Optional
+from typing import Dict, List, NoReturn, Optional, Tuple, TypedDict, Union
 
-import dns.dnssec
-import dns.resolver
-import dns.reversename
-import nmap
 import validators
 from pygments import formatters, highlight, lexers
 
