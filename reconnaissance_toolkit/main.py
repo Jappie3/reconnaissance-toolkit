@@ -55,9 +55,8 @@ def validate_targets(targets: List, l: logging.Logger) -> None:
                 l.debug(f"Valid IP: {target}")
             except ValueError:
                 l.error(
-                    f"Invalid target: {target}\nThe list should only contain IP addresses (both IPv4 & IPv6) and domain names (without path or protocol)."
+                    f"Invalid target: skipping {target}. The list of targets should only contain IP addresses (both IPv4 & IPv6) and domain names (without path, protocol or port)."
                 )
-                exit(1)
     return targets_res
 
 
