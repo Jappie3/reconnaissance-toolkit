@@ -25,13 +25,13 @@ class TargetDict(TypedDict):
     results: List
 
 
-def ssh_audit(t: TargetDict) -> Dict[str, Dict[str, Any]]:
+def ssh_audit(t: TargetDict, l: logging.Logger) -> Dict[str, Dict[str, Any]]:
     target = t["target"]
-    LOG.debug(f"ssh-audit - Starting scan for {target}")
+    l.debug(f"ssh-audit - Starting scan for {target}")
     try:
         shell = os.environ.get("SHELL")
     except Exception as e:
-        LOG.error(f"ssh-audit - Could not retrieve shell from SHELL env var: {e}")
+        l.error(f"ssh-audit - Could not retrieve shell from SHELL env var: {e}")
     else:
         try:
             result = subprocess.run(
@@ -43,32 +43,28 @@ def ssh_audit(t: TargetDict) -> Dict[str, Dict[str, Any]]:
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
             )
-            LOG.debug(f"ssh-audit - Finished scan for {target}")
+            l.debug(f"ssh-audit - Finished scan for {target}")
             return {"ssh-audit": json.loads(result.stdout)}
         except Exception as e:
-            LOG.error(f"ssh-audit - Something went wrong while running ssh-audit: {e}")
+            l.error(f"ssh-audit - Something went wrong while running ssh-audit: {e}")
 
 
-def port_scan(
-    t: TargetDict,
-) -> Dict[str, Dict[str, Any]]:
+def port_scan(t: TargetDict, l: logging.Logger) -> Dict[str, Dict[str, Any]]:
     """
     Perform a port scan on a target using the Nmap library.
     """
     target = t["target"]
-    LOG.debug(f"port-scan - Starting scan for {target}")
+    l.debug(f"port-scan - Starting scan for {target}")
     nm = nmap.PortScanner()
 
     try:
         nm.scan(target, arguments="-p-", sudo=True)
     except Exception as e:
-        LOG.error(
-            f"port-scan - Something went wrong while trying to scan {target}: {e}"
-        )
+        l.error(f"port-scan - Something went wrong while trying to scan {target}: {e}")
     else:
         if target in nm.all_hosts():
             host = nm[target]
-            LOG.debug(f"port-scan - Finished scan for {target}")
+            l.debug(f"port-scan - Finished scan for {target}")
             return {
                 "port-scan": {
                     "vendor": host["vendor"],
@@ -85,26 +81,26 @@ def port_scan(
             return {"port-scan": "IP unreachable or invalid"}
 
 
-def detect_os(t: TargetDict) -> Dict[str, Dict[str, Any]]:
+def detect_os(t: TargetDict, l: logging.Logger) -> Dict[str, Dict[str, Any]]:
     """
     Try to detect the OS of the target using the Nmap library.
     """
     target = t["target"]
     nm = nmap.PortScanner()
-    LOG.debug(
+    l.debug(
         f"OS-detection - Running OS scan against {target}, will request root privileges if necessary..."
     )
     try:
         nm.scan(target, arguments="-O", sudo=True)
     except Exception as e:
-        LOG.error(
+        l.error(
             f"OS-detection - Something went wrong while trying to scan {target}: {e}"
         )
     else:
         if target in nm.all_hosts():
             os_info = nm[target]["osmatch"]
             if os_info:
-                LOG.debug(f"OS-detection - Finished scanning {target}")
+                l.debug(f"OS-detection - Finished scanning {target}")
                 return {
                     "OS-detection": {
                         "name": os_info[0]["name"],
@@ -117,19 +113,21 @@ def detect_os(t: TargetDict) -> Dict[str, Dict[str, Any]]:
             return {"OS-detection": "IP unreachable or invalid"}
 
 
-def dns_lookup(t: TargetDict) -> Dict[str, Dict[str, Union[list[str], str]]]:
+def dns_lookup(
+    t: TargetDict, l: logging.Logger
+) -> Dict[str, Dict[str, Union[list[str], str]]]:
     """
     Retrieve information about a target via DNS
     The resolver to be used is stored in the global variable DNS_RESOLVER
     """
     target = t["target"]
     type = t["type"]
-    resolver = dns.resolver.make_resolver_at(DNS_RESOLVER)
+    resolver = dns.resolver.make_resolver_at(os.getenv("DNS_RESOLVER", "9.9.9.9"))
     qname = dns.name.from_text(target)
     results = {"DNS": {}}
     if type == "domain":
         # domain -> look up some records & append them to results['DNS']
-        LOG.debug(f"DNS - Scanning domain: {target}")
+        l.debug(f"DNS - Scanning domain: {target}")
         for record in [
             dns.rdatatype.NS,
             dns.rdatatype.A,
@@ -141,10 +139,10 @@ def dns_lookup(t: TargetDict) -> Dict[str, Dict[str, Union[list[str], str]]]:
                 recs = resolver.resolve(qname, record)
                 results["DNS"][dns.rdatatype.to_text(record)] = [str(r) for r in recs]
             except Exception as e:
-                LOG.error(f"DNS - {target}: {e}")
+                l.error(f"DNS - {target}: {e}")
 
         # look up NS & get NS IP
-        LOG.debug(f"DNS - Checking & validating DNSSEC for: {target}")
+        l.debug(f"DNS - Checking & validating DNSSEC for: {target}")
 
         # get IP of NS
         try:
@@ -164,7 +162,7 @@ def dns_lookup(t: TargetDict) -> Dict[str, Dict[str, Union[list[str], str]]]:
             dns.resolver.NoAnswer,
             dns.resolver.NoNameservers,
         ) as e:
-            LOG.error(f"DNS - Error while checking NS records for {target}: {e}")
+            l.error(f"DNS - Error while checking NS records for {target}: {e}")
 
         # validate DNSSEC
         try:
@@ -194,11 +192,11 @@ def dns_lookup(t: TargetDict) -> Dict[str, Dict[str, Union[list[str], str]]]:
 
         except Exception as e:
             results["DNS"]["DNSSEC"] = False
-            LOG.error(f"DNS - Error while validating DNSSEC for {target}: {e}")
+            l.error(f"DNS - Error while validating DNSSEC for {target}: {e}")
 
     elif type == "ip":
         # IP -> look up reverse DNS for the host & append to results['DNS']
-        LOG.debug(f"DNS - Scanning IP: {target}")
+        l.debug(f"DNS - Scanning IP: {target}")
         addr = dns.reversename.from_address(target)
         results["DNS"]["RDNS"] = {
             "IP": str(addr),
@@ -206,8 +204,8 @@ def dns_lookup(t: TargetDict) -> Dict[str, Dict[str, Union[list[str], str]]]:
         }
     else:
         # this should never happen but still
-        LOG.error(f"DNS - not an IP or domain, can't scan: {target}")
-    LOG.debug(f"DNS - Finished scanning {target}")
+        l.error(f"DNS - not an IP or domain, can't scan: {target}")
+    l.debug(f"DNS - Finished scanning {target}")
     return results
 
 
@@ -220,28 +218,30 @@ SCANS_MAP = {
 }
 
 
-def validate_targets(targets: List) -> None:
+def validate_targets(targets: List, l: logging.Logger) -> None:
     """
     Validate an array of targets
     """
-    LOG.info(f"Validating {len(targets)} targets...")
+    targets_res = []
+    l.info(f"Validating {len(targets)} targets...")
     for target in targets:
         if validators.domain(target):
-            LOG.debug(f"Valid domain: {target}")
-            TARGETS.append({"target": target, "type": "domain", "results": []})
+            l.debug(f"Valid domain: {target}")
+            targets_res.append({"target": target, "type": "domain", "results": []})
         else:
             try:
                 ipaddress.ip_address(target)
-                TARGETS.append({"target": target, "type": "ip", "results": []})
-                LOG.debug(f"Valid IP: {target}")
+                targets_res.append({"target": target, "type": "ip", "results": []})
+                l.debug(f"Valid IP: {target}")
             except ValueError:
-                LOG.error(
+                l.error(
                     f"Invalid target: {target}\nThe list should only contain IP addresses (both IPv4 & IPv6) and domain names (without path or protocol)."
                 )
                 exit(1)
+    return targets_res
 
 
-def init() -> None:
+def init() -> logging.Logger:
     """
     Parse arguments & set necessary variables
     """
@@ -312,28 +312,21 @@ def init() -> None:
 
     args = parser.parse_args()
 
-    global TARGETS_TXT
-    TARGETS_TXT = (
+    targets = (
         [args.target]
         if args.target is not None
         else open("targets.txt", "r").read().splitlines()
     )
 
-    global SCANS
-    SCANS = args.scans
+    scans = args.scans
+    output_file = args.output_file
+    silent = args.silent
 
-    global OUTPUT_FILE
-    OUTPUT_FILE = args.output_file
+    # set as env var so it can be used in imported files as well
+    os.environ["DNS_RESOLVER"] = args.dns_resolver
 
-    global DNS_RESOLVER
-    DNS_RESOLVER = args.dns_resolver
-
-    global SILENT
-    SILENT = args.silent
-
-    global LOG
-    LOG = logging.getLogger("logger")
-    LOG.setLevel(args.log_level)
+    log = logging.getLogger("logger")
+    log.setLevel(args.log_level)
 
     formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
 
@@ -342,62 +335,66 @@ def init() -> None:
         console_handler = logging.StreamHandler()
         console_handler.setLevel(args.log_level)
         console_handler.setFormatter(formatter)
-        LOG.addHandler(console_handler)
+        log.addHandler(console_handler)
 
     # file handler - write log to file
     if args.log_file:
         if os.path.exists(args.log_file):
-            LOG.critical(
+            log.critical(
                 f"Error: file {args.log_file} exists. Either remove it or specify a different log file."
             )
             exit(1)
         file_handler = logging.FileHandler(args.log_file)
         file_handler.setLevel(args.log_level)
         file_handler.setFormatter(formatter)
-        LOG.addHandler(file_handler)
+        log.addHandler(file_handler)
 
-    LOG.info(f"Log level set to {args.log_level}")
+    log.info(f"Log level set to {args.log_level}")
 
     if args.output_file and os.path.exists(args.output_file):
-        LOG.critical(
+        log.critical(
             f"Error: file {args.output_file} exists. Either remove it or specify a different output file."
         )
         exit(1)
 
+    return targets, scans, log, output_file, silent
+
 
 def main() -> None:
-    init()
-    validate_targets(TARGETS_TXT)
+    targets_txt, scans, log, output_file, silent = init()
+    targets = validate_targets(targets_txt, log)
 
     # for every scan the user specified
-    for scan in SCANS:
-        LOG.info(f"Main - processing scan: {scan}...")
+    for scan in scans:
+        log.info(f"Main - processing scan: {scan}...")
         # TODO use threading (maybe a pool) to start a bunch of scans at the same time
         # also make an option to stay single-threaded to prevent detection?
         # run the scan for every target
-        for i in range(0, len(TARGETS)):
-            TARGETS[i]["results"].append(SCANS_MAP[scan](TARGETS[i]))
+        for i in range(0, len(targets)):
+            targets[i]["results"].append(SCANS_MAP[scan](targets[i], log))
 
-    LOG.info(f"Main - All scans processed, handling output...")
+    log.info(f"Main - All scans processed, handling output...")
 
-    if not SILENT:
-        LOG.info(f"Main - printing to STDOUT")
+    log.debug(f"Main - Result of scans: {targets}")
+
+    if not silent:
+        log.info(f"Main - printing to STDOUT")
         print(
             highlight(
-                json.dumps(TARGETS, indent=2),
+                json.dumps(targets, indent=2),
                 lexers.JsonLexer(),
                 formatters.TerminalFormatter(),
             )
         )
 
-    if OUTPUT_FILE:
-        LOG.info(f"Main - Writing output to file...")
-        with open(OUTPUT_FILE, "w") as f:
+    if output_file:
+        log.info(f"Main - Writing output to file...")
+        with open(output_file, "w") as f:
             f.write(
-                json.dumps(TARGETS),
+                json.dumps(targets),
             )
 
-    LOG.info(f"Main - Program done, exiting...")
+    log.info(f"Main - Program done, exiting...")
     exit(0)
 
 
