@@ -11,7 +11,8 @@ class TargetDict(TypedDict):
     results: List
 
 
-def main(t: TargetDict, l: logging.Logger) -> Dict[str, Dict[str, Any]]:
+def main(t: TargetDict) -> Dict[str, Dict[str, Any]]:
+    l = logging.getLogger("logger")
     target = t["target"]
     l.debug(f"ssh-audit - Starting scan for {target}")
     try:

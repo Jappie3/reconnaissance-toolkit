@@ -7,6 +7,8 @@ from typing import Dict, List, NoReturn, Optional, Tuple, TypedDict, Union
 
 import validators
 from pygments import formatters, highlight, lexers
+from rich.logging import RichHandler
+from rich.progress import track
 
 from . import detect_os, dns_lookup, port_scan, ssh_scan
 
@@ -140,16 +142,11 @@ def init() -> Tuple[List, List, logging.Logger, bool, Optional[str]]:
     os.environ["DNS_RESOLVER"] = args.dns_resolver
 
     log = logging.getLogger("logger")
-    log.setLevel(args.log_level)
 
-    formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
-
-    if not args.silent:
-        # console handler - write log to stdout
-        console_handler = logging.StreamHandler()
-        console_handler.setLevel(args.log_level)
-        console_handler.setFormatter(formatter)
-        log.addHandler(console_handler)
+    logging.basicConfig(
+        level=args.log_level if not args.silent else "CRITICAL",
+        handlers=[RichHandler(level="NOTSET")],
+    )
 
     # file handler - write log to file
     if args.log_file:
@@ -160,7 +157,9 @@ def init() -> Tuple[List, List, logging.Logger, bool, Optional[str]]:
             exit(1)
         file_handler = logging.FileHandler(args.log_file)
         file_handler.setLevel(args.log_level)
-        file_handler.setFormatter(formatter)
+        file_handler.setFormatter(
+            logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+        )
         log.addHandler(file_handler)
 
     log.info(f"Log level set to {args.log_level}")
@@ -171,21 +170,22 @@ def init() -> Tuple[List, List, logging.Logger, bool, Optional[str]]:
         )
         exit(1)
 
-    return targets, scans, log, silent, output_file
+    return targets, scans, silent, output_file
 
 
 def main() -> NoReturn:
-    targets_txt, scans, log, silent, output_file = init()
+    targets_txt, scans, silent, output_file = init()
+    log = logging.getLogger("logger")
     targets = validate_targets(targets_txt, log)
 
     # for every scan the user specified
-    for scan in scans:
+    for scan in track(scans, disable=silent):
         log.info(f"Main - Processing scan: {scan}...")
         # TODO use threading (maybe a pool) to start a bunch of scans at the same time
         # also make an option to stay single-threaded to prevent detection?
         # run the scan for every target
         for i in range(0, len(targets)):
-            targets[i]["results"].append(SCANS_MAP[scan](targets[i], log))
+            targets[i]["results"].append(SCANS_MAP[scan](targets[i]))
 
     log.info(f"Main - All scans processed, handling output...")
 

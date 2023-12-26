@@ -10,10 +10,11 @@ class TargetDict(TypedDict):
     results: List
 
 
-def main(t: TargetDict, l: logging.Logger) -> Dict[str, Dict[str, Any]]:
+def main(t: TargetDict) -> Dict[str, Dict[str, Any]]:
     """
     Try to detect the OS of the target using the Nmap library.
     """
+    l = logging.getLogger("logger")
     target = t["target"]
     nm = nmap.PortScanner()
     l.debug(

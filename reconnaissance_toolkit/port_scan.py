@@ -10,10 +10,11 @@ class TargetDict(TypedDict):
     results: List
 
 
-def main(t: TargetDict, l: logging.Logger) -> Dict[str, Dict[str, Any]]:
+def main(t: TargetDict) -> Dict[str, Dict[str, Any]]:
     """
     Perform a port scan on a target using the Nmap library.
     """
+    l = logging.getLogger("logger")
     target = t["target"]
     l.debug(f"port-scan - Starting scan for {target}")
     nm = nmap.PortScanner()

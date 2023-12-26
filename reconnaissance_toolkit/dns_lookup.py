@@ -13,12 +13,11 @@ class TargetDict(TypedDict):
     results: List
 
 
-def main(
-    t: TargetDict, l: logging.Logger
-) -> Dict[str, Dict[str, Union[list[str], str]]]:
+def main(t: TargetDict) -> Dict[str, Dict[str, Union[list[str], str]]]:
     """
     Retrieve information about a target via DNS
     """
+    l = logging.getLogger("logger")
     target = t["target"]
     type = t["type"]
     resolver_ip = os.getenv("DNS_RESOLVER", "9.9.9.9")
