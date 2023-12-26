@@ -358,7 +358,7 @@ def init() -> None:
 
     LOG.info(f"Log level set to {args.log_level}")
 
-    if os.path.exists(args.output_file):
+    if args.output_file and os.path.exists(args.output_file):
         LOG.critical(
             f"Error: file {args.output_file} exists. Either remove it or specify a different output file."
         )
