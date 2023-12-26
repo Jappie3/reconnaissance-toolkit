@@ -186,7 +186,7 @@ def main() -> None:
 
     # for every scan the user specified
     for scan in scans:
-        log.info(f"Main - processing scan: {scan}...")
+        log.info(f"Main - Processing scan: {scan}...")
         # TODO use threading (maybe a pool) to start a bunch of scans at the same time
         # also make an option to stay single-threaded to prevent detection?
         # run the scan for every target
@@ -198,7 +198,7 @@ def main() -> None:
     log.debug(f"Main - Result of scans: {targets}")
 
     if not silent:
-        log.info(f"Main - printing to STDOUT")
+        log.info(f"Main - Printing to STDOUT")
         print(
             highlight(
                 json.dumps(targets, indent=2),
