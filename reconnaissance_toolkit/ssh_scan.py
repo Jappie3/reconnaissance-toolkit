@@ -2,7 +2,7 @@ import json
 import logging
 import os
 import subprocess
-from typing import Any, Dict, List, TypedDict
+from typing import Any, Dict, List, TypedDict, Union
 
 
 class TargetDict(TypedDict):
@@ -11,7 +11,7 @@ class TargetDict(TypedDict):
     results: List
 
 
-def main(t: TargetDict) -> Dict[str, Dict[str, Any]]:
+def main(t: TargetDict) -> Dict[str, Union[str, Dict[str, Any]]]:
     l = logging.getLogger("logger")
     target = t["target"]
     l.debug(f"ssh-audit - Starting scan for {target}")
@@ -34,4 +34,4 @@ def main(t: TargetDict) -> Dict[str, Dict[str, Any]]:
             return {"ssh-audit": json.loads(result.stdout)}
         except Exception as e:
             l.error(f"ssh-audit - Something went wrong while running ssh-audit: {e}")
-            return {"ssh-audit": None}
+    return {"ssh-audit": "Something went wrong"}

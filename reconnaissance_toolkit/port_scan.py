@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List, TypedDict
+from typing import Any, Dict, List, TypedDict, Union
 
 import nmap
 
@@ -10,7 +10,7 @@ class TargetDict(TypedDict):
     results: List
 
 
-def main(t: TargetDict) -> Dict[str, Dict[str, Any]]:
+def main(t: TargetDict) -> Dict[str, Union[str, Dict[str, Any]]]:
     """
     Perform a port scan on a target using the Nmap library.
     """
@@ -41,3 +41,4 @@ def main(t: TargetDict) -> Dict[str, Dict[str, Any]]:
             }
         else:
             return {"port-scan": "IP unreachable or invalid"}
+    return {"port-scan": "Something went wrong"}
