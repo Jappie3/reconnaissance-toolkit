@@ -23,6 +23,7 @@
         types-ipaddress # typing stubs for ipaddress
         #argh # argparse wrapper
         pygments # syntax highlighter for e.g. json output
+        rich # render rich text, tables, progress bars, syntax highlighting, markdown etc. to the terminal
       ];
     pypi-packages = ps:
       with ps; [
