@@ -13,7 +13,7 @@ class TargetDict(TypedDict):
     results: List
 
 
-def dns_lookup(
+def main(
     t: TargetDict, l: logging.Logger
 ) -> Dict[str, Dict[str, Union[list[str], str]]]:
     """

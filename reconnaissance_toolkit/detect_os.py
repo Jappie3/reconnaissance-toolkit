@@ -10,7 +10,7 @@ class TargetDict(TypedDict):
     results: List
 
 
-def detect_os(t: TargetDict, l: logging.Logger) -> Dict[str, Dict[str, Any]]:
+def main(t: TargetDict, l: logging.Logger) -> Dict[str, Dict[str, Any]]:
     """
     Try to detect the OS of the target using the Nmap library.
     """
