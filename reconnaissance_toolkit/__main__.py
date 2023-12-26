@@ -29,10 +29,10 @@ class TargetDict(TypedDict):
 
 # dictionary to map strings passed in as arguments to function definitions
 SCANS_MAP = {
-    "dns-lookup": dns_lookup,
-    "detect-os": detect_os,
-    "port-scan": port_scan,
-    "ssh-audit": ssh_scan,
+    "dns-lookup": dns_lookup.main,
+    "detect-os": detect_os.main,
+    "port-scan": port_scan.main,
+    "ssh-audit": ssh_scan.main,
 }
 
 
