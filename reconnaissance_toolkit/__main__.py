@@ -54,7 +54,7 @@ def validate_targets(
                 targets_res.append({"target": target, "type": "ip", "results": []})
                 l.debug(f"Valid IP: {target}")
             except ValueError:
-                l.error(
+                l.warning(
                     f"Invalid target: skipping {target}. The list of targets should only contain IP addresses (both IPv4 & IPv6) and domain names (without path, protocol or port)."
                 )
     return targets_res
