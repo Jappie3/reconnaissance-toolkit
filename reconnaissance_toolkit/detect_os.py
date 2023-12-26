@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List, TypedDict
+from typing import Any, Dict, List, TypedDict, Union
 
 import nmap
 
@@ -10,7 +10,7 @@ class TargetDict(TypedDict):
     results: List
 
 
-def main(t: TargetDict) -> Dict[str, Dict[str, Any]]:
+def main(t: TargetDict) -> Dict[str, Union[str, Dict[str, Any]]]:
     """
     Try to detect the OS of the target using the Nmap library.
     """
@@ -41,3 +41,4 @@ def main(t: TargetDict) -> Dict[str, Dict[str, Any]]:
                 return {"OS-detection": "OS information not available"}
         else:
             return {"OS-detection": "IP unreachable or invalid"}
+    return {"OS-detection": "Something went wrong"}
