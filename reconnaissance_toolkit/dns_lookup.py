@@ -21,7 +21,9 @@ def dns_lookup(
     """
     target = t["target"]
     type = t["type"]
-    resolver = dns.resolver.make_resolver_at(os.getenv("DNS_RESOLVER", "9.9.9.9"))
+    resolver_ip = os.getenv("DNS_RESOLVER", "9.9.9.9")
+    resolver = dns.resolver.make_resolver_at(resolver_ip)
+    l.info(f"DNS - Using {resolver_ip} as upstream DNS resolver.")
     qname = dns.name.from_text(target)
     results = {"DNS": {}}
     if type == "domain":
