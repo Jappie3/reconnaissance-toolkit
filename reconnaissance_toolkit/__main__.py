@@ -31,12 +31,11 @@ SCANS_MAP = {
 }
 
 
-def validate_targets(
-    targets: List, l: logging.Logger
-) -> List[Dict[str, Union[str, List]]]:
+def validate_targets(targets: List) -> List[TargetDict]:
     """
     Validate an array of targets
     """
+    l = logging.getLogger("logger")
     targets_res = []
     l.info(f"Validating {len(targets)} targets...")
     for target in targets:
@@ -57,7 +56,7 @@ def validate_targets(
     return targets_res
 
 
-def init() -> Tuple[List, List, logging.Logger, bool, Optional[str]]:
+def init() -> Tuple[List, List, bool, Optional[str]]:
     """
     Parse arguments & set necessary variables
     """
@@ -176,7 +175,7 @@ def init() -> Tuple[List, List, logging.Logger, bool, Optional[str]]:
 def main() -> NoReturn:
     targets_txt, scans, silent, output_file = init()
     log = logging.getLogger("logger")
-    targets = validate_targets(targets_txt, log)
+    targets = validate_targets(targets_txt)
 
     # for every scan the user specified
     for scan in track(scans, disable=silent):
