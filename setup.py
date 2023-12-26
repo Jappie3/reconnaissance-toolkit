@@ -5,7 +5,7 @@ setup(
     version="0.0.1",
     entry_points={
         "console_scripts": [
-            "reconnaissance-toolkit = reconnaissance_toolkit.main:main",
+            "reconnaissance-toolkit = reconnaissance_toolkit.__main__:main",
         ],
     },
     install_requires=[
