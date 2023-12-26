@@ -33,3 +33,4 @@ def ssh_audit(t: TargetDict, l: logging.Logger) -> Dict[str, Dict[str, Any]]:
             return {"ssh-audit": json.loads(result.stdout)}
         except Exception as e:
             l.error(f"ssh-audit - Something went wrong while running ssh-audit: {e}")
+            return {"ssh-audit": None}
