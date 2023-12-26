@@ -38,6 +38,8 @@ def validate_targets(
     targets_res = []
     l.info(f"Validating {len(targets)} targets...")
     for target in targets:
+        if target == "":
+            continue
         if validators.domain(target):
             l.debug(f"Valid domain: {target}")
             targets_res.append({"target": target, "type": "domain", "results": []})
