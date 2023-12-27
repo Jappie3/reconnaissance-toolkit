@@ -6,7 +6,7 @@ Small collection of Python scripts for reconnaissance and scanning of IPs & doma
 
 ## Features
 
-- Validation of targets before running scans
+- Read & validate list of targets from a file or specify a single target using `--target [IP|domain]`
 - Multithreading for running multiple scans simultaneously
 - Progress bars & colorful output using the [Rich library](https://github.com/Textualize/rich)
 - Option to save JSON output to a file
@@ -16,6 +16,7 @@ Small collection of Python scripts for reconnaissance and scanning of IPs & doma
     - `port-scan` -> use Nmap to find open TCP ports
     - `ssh-audit` -> run ssh-audit against the target
     - `dns-lookup` get some common records (NS, A, AAAA, TXT, MX) & validate DNSSEC if the target is a domain. If the target is an IP, try an RDNS lookup to find a PTR record & the FQDN associated with the target
+    - `http-headers` -> get a list of HTTP headers (both HTTP & HTTPS)
 
 ## Usage
 
