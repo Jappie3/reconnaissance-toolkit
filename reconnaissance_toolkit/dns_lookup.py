@@ -100,10 +100,13 @@ def main(t: TargetDict) -> Dict[str, Dict[str, Union[list[str], str]]]:
         # IP -> look up reverse DNS for the host & append to results['DNS']
         l.debug(f"DNS - Scanning IP: {target}")
         addr = dns.reversename.from_address(target)
-        results["DNS"]["RDNS"] = {
-            "IP": str(addr),
-            "FQDN": str(resolver.resolve(addr, "PTR")[0]),
-        }
+        try:
+            results["DNS"]["RDNS"] = {
+                "IP": str(addr),
+                "FQDN": str(resolver.resolve(addr, "PTR")[0]),
+            }
+        except Exception as e:
+            l.error(f"DNS - Error while looking up PTR record for {target}")
     else:
         # this should never happen but still
         l.error(f"DNS - not an IP or domain, can't scan: {target}")
