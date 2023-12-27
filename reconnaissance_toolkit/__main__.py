@@ -3,12 +3,21 @@ import ipaddress
 import json
 import logging
 import os
+import subprocess
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Dict, List, NoReturn, Optional, Tuple, TypedDict, Union
 
 import validators
 from pygments import formatters, highlight, lexers
 from rich.logging import RichHandler
-from rich.progress import track
+from rich.progress import (
+    BarColumn,
+    Progress,
+    TaskID,
+    TaskProgressColumn,
+    TextColumn,
+    TimeElapsedColumn,
+)
 
 from . import detect_os, dns_lookup, port_scan, ssh_scan
 
@@ -29,6 +38,15 @@ SCANS_MAP = {
     "port-scan": port_scan.main,
     "ssh-audit": ssh_scan.main,
 }
+
+progress = Progress(
+    TextColumn("[bold blue]{task.description}{task.fields[scan]}", justify="left"),
+    BarColumn(bar_width=None),
+    "Target {task.completed}/{task.total}" "•",
+    TaskProgressColumn(),
+    "•",
+    TimeElapsedColumn(),
+)
 
 
 def validate_targets(targets: List) -> List[TargetDict]:
@@ -172,19 +190,61 @@ def init() -> Tuple[List, List, bool, Optional[str]]:
     return targets, scans, silent, output_file
 
 
+def scan_target(task_id: TaskID, targets, scan) -> None:
+    progress.start_task(task_id)
+    log = logging.getLogger("logger")
+    log.info(f"Main - Processing scan: {scan}...")
+    # run the scan against every target in the list
+    for i in range(0, len(targets)):
+        targets[i]["results"].append(SCANS_MAP[scan](targets[i]))
+        # update the progress bar
+        progress.update(task_id, advance=1, done=i + 1)
+
+
 def main() -> NoReturn:
     targets_txt, scans, silent, output_file = init()
     log = logging.getLogger("logger")
     targets = validate_targets(targets_txt)
 
-    # for every scan the user specified
-    for scan in track(scans, disable=silent):
-        log.info(f"Main - Processing scan: {scan}...")
-        # TODO use threading (maybe a pool) to start a bunch of scans at the same time
-        # also make an option to stay single-threaded to prevent detection?
-        # run the scan for every target
-        for i in range(0, len(targets)):
-            targets[i]["results"].append(SCANS_MAP[scan](targets[i]))
+    # for scans that require sudo -> ask password now, since scan will run in a separate threat without TTY access
+    try:
+        log.info(f"Main - Checking if root privileges should be requested")
+        if any(s in scans for s in ["detect-os", "port-scan"]):
+            log.info(f"Main - Requesting root privileges...")
+            shell = os.environ.get("SHELL")
+            subprocess.run(
+                # we just need to run any sudo command so that the scan(s) won't prompt for a password again
+                f"sudo whoami > /dev/null 2>&1",
+                shell=True,
+                executable=shell,
+                check=True,
+                text=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+            )
+            log.info(f"Main - Root privileges requested successfully")
+    except Exception as e:
+        log.critical(f"Main - Could not retrieve shell from SHELL env var: {e}")
+        exit(1)
+
+    futures = []
+    with progress:
+        # with statement -> ensure all threads are cleaned up properly
+        with ThreadPoolExecutor(max_workers=4) as pool:
+            # for all scans the user specified
+            for scan in scans:
+                task_id = progress.add_task(
+                    "Running scan - ",
+                    scan=scan,
+                    total=len(targets),
+                    start=False,
+                    visible=not silent,
+                )
+                # start a new threat that will run the scan against every target
+                futures.append(pool.submit(scan_target, task_id, targets, scan))
+
+    # wait for all the scans to complete
+    as_completed(futures)
 
     log.info(f"Main - All scans processed, handling output...")
 
