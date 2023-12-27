@@ -71,6 +71,7 @@ def validate_targets(targets: List) -> List[TargetDict]:
                 l.warning(
                     f"Invalid target: skipping {target}. The list of targets should only contain IP addresses (both IPv4 & IPv6) and domain names (without path, protocol or port)."
                 )
+    l.info(f"Validated {len(targets)} targets")
     return targets_res
 
 
