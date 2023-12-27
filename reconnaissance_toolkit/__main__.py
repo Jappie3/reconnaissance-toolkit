@@ -19,7 +19,7 @@ from rich.progress import (
     TimeElapsedColumn,
 )
 
-from . import detect_os, dns_lookup, port_scan, ssh_scan
+from . import detect_os, dns_lookup, port_scan, ssh_scan, http_headers
 from .targetdict import TargetDict
 
 global TARGETS
@@ -32,6 +32,7 @@ SCANS_MAP = {
     "detect-os": detect_os.main,
     "port-scan": port_scan.main,
     "ssh-audit": ssh_scan.main,
+    "http-headers": http_headers.main,
 }
 
 progress = Progress(
