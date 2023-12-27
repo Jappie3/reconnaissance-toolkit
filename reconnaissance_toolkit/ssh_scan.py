@@ -8,6 +8,9 @@ from .targetdict import TargetDict
 
 
 def main(t: TargetDict) -> Dict[str, Union[str, Dict[str, Any]]]:
+    """
+    Run ssh-audit against the target, only checks port 22.
+    """
     l = logging.getLogger("logger")
     target = t["target"]
     l.debug(f"ssh-audit - Starting scan for {target}")
