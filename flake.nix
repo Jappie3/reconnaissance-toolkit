@@ -64,8 +64,15 @@
             pname = "reconnaissance-toolkit";
             version = "0.0.1";
             src = ./.;
-            propagatedBuildInputs = [
-              (pkgs.python3.withPackages python-packages)
+            propagatedBuildInputs = with pkgs.python3Packages; [
+              requests
+              paramiko
+              dnspython
+              python-nmap
+              validators
+              types-ipaddress
+              pygments
+              rich
             ];
             checkPhase = ''
               runHook preCheck
