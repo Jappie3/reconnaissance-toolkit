@@ -17,9 +17,7 @@ def main(t: TargetDict) -> Dict[str, Union[str, Dict[str, Any]]]:
     l = logging.getLogger("logger")
     target = t["target"]
     nm = nmap.PortScanner()
-    l.debug(
-        f"OS-detection - Running OS scan against {target}, will request root privileges if necessary..."
-    )
+    l.debug(f"OS-detection - Starting scan for {target}")
     try:
         nm.scan(target, arguments="-O", sudo=True)
     except Exception as e:
