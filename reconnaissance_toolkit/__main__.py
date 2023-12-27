@@ -5,7 +5,7 @@ import logging
 import os
 import subprocess
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from typing import Dict, List, NoReturn, Optional, Tuple, TypedDict, Union
+from typing import List, NoReturn, Optional, Tuple
 
 import validators
 from pygments import formatters, highlight, lexers
@@ -20,15 +20,10 @@ from rich.progress import (
 )
 
 from . import detect_os, dns_lookup, port_scan, ssh_scan
+from .targetdict import TargetDict
 
 global TARGETS
 TARGETS = []
-
-
-class TargetDict(TypedDict):
-    target: str
-    type: str
-    results: List
 
 
 # dictionary to map strings passed in as arguments to function definitions

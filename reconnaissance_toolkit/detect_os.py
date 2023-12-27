@@ -3,11 +3,7 @@ from typing import Any, Dict, List, TypedDict, Union
 
 import nmap
 
-
-class TargetDict(TypedDict):
-    target: str
-    type: str
-    results: List
+from .targetdict import TargetDict
 
 
 def main(t: TargetDict) -> Dict[str, Union[str, Dict[str, Any]]]:

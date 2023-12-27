@@ -10,11 +10,7 @@ import dns.rdatatype
 import dns.resolver
 import dns.reversename
 
-
-class TargetDict(TypedDict):
-    target: str
-    type: str
-    results: List
+from .targetdict import TargetDict
 
 
 def main(t: TargetDict) -> Dict[str, Dict[str, Union[list[str], str]]]:
