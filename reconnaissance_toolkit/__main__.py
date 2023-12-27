@@ -162,6 +162,8 @@ def init() -> Tuple[List, List, bool, Optional[str]]:
         handlers=[RichHandler(level="NOTSET")],
     )
 
+    logging.captureWarnings(True)
+
     # file handler - write log to file
     if args.log_file:
         if os.path.exists(args.log_file):
