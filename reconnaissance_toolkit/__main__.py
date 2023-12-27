@@ -22,10 +22,6 @@ from rich.progress import (
 from . import detect_os, dns_lookup, http_headers, port_scan, ssh_scan
 from .targetdict import TargetDict
 
-global TARGETS
-TARGETS = []
-
-
 # dictionary to map strings passed in as arguments to function definitions
 SCANS_MAP = {
     "dns-lookup": dns_lookup.main,
