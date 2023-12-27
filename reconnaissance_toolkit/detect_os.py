@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List, TypedDict, Union
+from typing import Any, Dict, Union
 
 import nmap
 

@@ -1,6 +1,6 @@
 import logging
 import os
-from typing import Dict, List, TypedDict, Union
+from typing import Dict, Union
 
 import dns.dnssec
 import dns.message
