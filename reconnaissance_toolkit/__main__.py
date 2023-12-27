@@ -19,7 +19,7 @@ from rich.progress import (
     TimeElapsedColumn,
 )
 
-from . import detect_os, dns_lookup, port_scan, ssh_scan, http_headers
+from . import detect_os, dns_lookup, http_headers, port_scan, ssh_scan
 from .targetdict import TargetDict
 
 global TARGETS
