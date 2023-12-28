@@ -15,7 +15,6 @@
     python-packages = ps:
       with ps; [
         requests # HTTP library
-        paramiko # native Python SSHv2 protocol library
         dnspython # DNS toolkit for Python
         #scapy # network packet manipulation library
         python-nmap # nmap port scanner
@@ -66,7 +65,6 @@
             src = ./.;
             propagatedBuildInputs = with pkgs.python3Packages; [
               requests
-              paramiko
               dnspython
               python-nmap
               validators
